@@ -9,7 +9,7 @@
 
 ## 数据下载
 
-当前最新版数据在 **src文件夹** 内，此数据发布于`统计局2020-11-06`、`民政部2021-05-10`、`腾讯地图行政区划2021-11-03`、`高德地图行政区划采集当天`。
+当前最新版数据在 **src文件夹** 内，此数据更新于2022-02-06，整合了 `统计局2021-12-30`、`民政部2021-05-10`、`腾讯地图行政区划2022-01-14`、`高德地图行政区划采集当天` 数据。
 
 可在 [GitHub Releases](https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov/releases) 中下载最新发布数据文件，也可直接打开 `src/采集到的数据` 文件夹内的文件来使用。
 
@@ -52,7 +52,7 @@ git clone --depth 1 https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov.git
 
 - [国家统计局](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/) ：统计用区划和城乡划分代码，此数据比较齐全但是比较杂，并且数据是一年一更可能会存在滞后，需额外移除和处理开发区、经济区、高新区、国家级新区等区域；此数据源为省市区三级数据的主要数据源，镇级辅助数据源。
 
-- [民政部](http://www.mca.gov.cn/article/sj/xzqh/) ：行政区划代码，提供省市区三级数据，一月一更；为辅助数据源。
+- [民政部](http://www.mca.gov.cn/article/sj/xzqh/) ：行政区划代码，提供省市区三级数据，一月一更（不过2021半年没有更新）；为辅助数据源。
 
 - [腾讯地图行政区划](https://lbs.qq.com/webservice_v1/guide-region.html)：提供省市区镇四级数据，更新比较频繁；为镇级主要数据源，省市区三级辅助数据源。
 
@@ -63,13 +63,14 @@ git clone --depth 1 https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov.git
 
 ## 采集环境
 
-chrome 控制台，`Chrome 41`这版本蛮好，win7能用，`Chrome 46`这版本win10能用；新版本`Chrome 72+`乱码（统计局内页编码为`gb2312`，新版本`xhr`对编码反而支持的超级不友好，估计是印度阿三干的）、SwitchyOmega代理没有效果、各种问题（[简单制作chrome便携版实现多版本共存](https://github.com/xiangyuecn/Docs/blob/master/Other/%E8%87%AA%E5%B7%B1%E5%88%B6%E4%BD%9Cchrome%E4%BE%BF%E6%90%BA%E7%89%88%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%89%88%E6%9C%AC%E5%85%B1%E5%AD%98.md)）。
+chrome 控制台，当前数据采集使用的chrome版本：`Chrome 97` + `Chrome 80`，chrome越来越难用（[简单制作chrome便携版实现多版本共存](https://github.com/xiangyuecn/Docs/blob/master/Other/%E8%87%AA%E5%B7%B1%E5%88%B6%E4%BD%9Cchrome%E4%BE%BF%E6%90%BA%E7%89%88%E5%AE%9E%E7%8E%B0%E5%A4%9A%E7%89%88%E6%9C%AC%E5%85%B1%E5%AD%98.md)）。
 
-乱码的根本原因在于统计局服务器响应的内容编码为`gb2312`，但服务器响应头只给了`Content-Type: text/html`，因此可用Fiddler篡改`Content-Type`响应头为`Content-Type: text/html; charset=gb2312`也可解决新版Chrome乱码问题。
+2022年以前统计局数据乱码的根本原因在于统计局服务器响应的内容编码为`gb2312`（2022已采用utf-8编码无此问题），但服务器响应头只给了`Content-Type: text/html`，因此可用Fiddler篡改`Content-Type`响应头为`Content-Type: text/html; charset=gb2312`也可解决新版Chrome乱码问题。
 
 
 ## 采集深度
 
+- 2021.210510.220114版(更新时间: 2022-02-06)采集了4层，省、市、区、镇，来源：[统计局2021版数据](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2021/index.html)；省市区3级合并了[民政部2021-05-10数据](http://www.mca.gov.cn/article/sj/xzqh/1980/202105/20210500033655.shtml)、[高德地图行政区域](https://lbs.amap.com/api/webservice/guide/api/district)、[腾讯地图行政区划v20220114](https://lbs.qq.com/webservice_v1/guide-region.html)数据；镇级采用腾讯地图行政区划作为主要数据，综合高德和统计局的镇级。采集高德省市区三级坐标和行政区域边界范围。
 - 2020.210510.1103版(2021)采集了4层，省、市、区、镇，来源：[统计局2020版数据](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/index.html)；省市区3级合并了[民政部2021-05-10数据](http://www.mca.gov.cn/article/sj/xzqh/1980/202105/20210500033655.shtml)、[高德地图行政区域](https://lbs.amap.com/api/webservice/guide/api/district)、[腾讯地图行政区划v20211103](https://lbs.qq.com/webservice_v1/guide-region.html)数据；镇级采用腾讯地图行政区划作为主要数据，综合高德和统计局的镇级。采集高德省市区三级坐标和行政区域边界范围。
 - 2020.201120.0814版(2020)采集了4层，省、市、区、镇，来源：[统计局2020版数据](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2020/index.html)；省市区3级合并了[民政部2020-11-20数据](http://www.mca.gov.cn/article/sj/xzqh/2020/202011/20201100030582.shtml)、[高德地图行政区域](https://lbs.amap.com/api/webservice/guide/api/district)、[腾讯地图行政区划v20200814](https://lbs.qq.com/webservice_v1/guide-region.html)数据；镇级采用腾讯地图行政区划作为主要数据，综合高德和统计局的镇级。采集高德省市区三级坐标和行政区域边界范围。
 - 2019.200925.0814版(2020)采集了4层，省、市、区、镇，来源：[统计局2019版数据](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2019/index.html)；省市区3级合并了[民政部2020-09-25数据](http://www.mca.gov.cn/article/sj/xzqh/2020/2020/2020092500801.html)、[高德地图行政区域](https://lbs.amap.com/api/webservice/guide/api/district)、[腾讯地图行政区划v20200814](https://lbs.qq.com/webservice_v1/guide-region.html)数据；镇级采用腾讯地图行政区划作为主要数据，综合高德和统计局的镇级。采集高德省市区三级坐标和行政区域边界范围。

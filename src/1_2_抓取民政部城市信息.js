@@ -6,7 +6,7 @@ http://www.mca.gov.cn/article/sj/xzqh/中打开最新行政区划代码链接
 
 先加载jQuery
 var s=document.createElement("script");
-s.src="https://cdn.bootcss.com/jquery/1.9.1/jquery.min.js";
+s.src="https://cdn.bootcdn.net/ajax/libs/jquery/1.9.1/jquery.min.js";
 document.body.append(s);
 
 加载数据
@@ -73,10 +73,13 @@ var fixParent={
 	,4690:{name:"省直辖县级行政区划"}//海南省
 	,6590:{name:"自治区直辖县级行政区划"}//新疆
 };
-//人工修正数据，移除统计局或者mca的数据，mca新数据已撤销的市，统计局滞后
+//mca原始数据处理
+var fixRawMCA={
+	350403:{name:"三元区", replaceAs:{code:"350404",name:"三元区"}}
+};
+//人工修正数据，移除统计局的数据，mca新数据已撤销的市，统计局滞后
 var fixRemove={
-	340203:{name:"弋江区"}, //统计局老的id移除掉，新id为340209
-	320602:{name:"崇川区"}, //统计局老的id移除掉，新id为320613
+	//320602:{name:"崇川区"}, //统计局老的id移除掉，新id为320613
 	
 	//移除单独的港澳台，mca这些没有下级并且统计局没有这些
 	71:{name:"台湾省"}
@@ -91,6 +94,22 @@ var fixRename={
 var list=[];
 for(var i=0;i<arr.length;i++){
 	var o=arr[i];
+	var fix=fixRawMCA[o.code];
+	if(fix){
+		if(fix.remove){
+			fix.fix=true;
+			delete data[o.code];
+			continue;
+		}else if(fix.replaceAs){
+			fix.fix=true;
+			delete data[o.code];
+			o.code=fix.replaceAs.code||o.code;
+			o.name=fix.replaceAs.name||o.name;
+			data[o.code]=o;
+		}else{
+			throw new Error("无效的fixRawMCA",fix,o);
+		}
+	};
 	if(o.code.length==2){
 		list.push(o);
 	}else{
@@ -120,6 +139,12 @@ for(var i=0;i<arr.length;i++){
 			throw new Error("没有上级，请添加fixParent");
 		};
 		parent.child.push(o);
+	};
+};
+for(var k in fixRawMCA){
+	if(!fixRawMCA[k].fix){
+		console.error("存在未被匹配的预定义fixRawMCA",k,fixRawMCA[k]);
+		throw new Error();
 	};
 };
 console.log("民政部数据准备完成",list);

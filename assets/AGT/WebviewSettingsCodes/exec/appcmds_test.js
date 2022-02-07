@@ -17,6 +17,38 @@
 	Runtime.Log("echo",AppCmds.echo({v:123}).v==123?2:1);
 
 
+	/**验证http服务接口**/
+	try{
+		var port=29527;
+		AppCmds.closeHttpServer(port);
+		AppCmds.runHttpServer(JSON.stringify({
+			callback:"testHttpServer"
+			,port:port
+		}));
+		window.testHttpServer=function(reqInfo){
+			AppCmds.httpScriptTimeout(reqInfo.id, 1000);
+			
+			reqInfo.headers.sort();
+			var info=JSON.stringify(reqInfo,null,'\t');
+
+			setTimeout(function(){
+				var html='<div style="font-size:80px">服务已运行</div>'
+						+'<pre>请求信息：'+info.replace(/&/g,"&amp;").replace(/</g,"&lt;")+'</pre>';
+				var val={
+	 				status:200
+					,contentType:"text/html; charset=utf-8"
+					,headers:[ "x-add1: add1"
+						, "x-add2: add2","x-add2: add3","x-add2: add4" ]
+					,data:btoa(unescape(encodeURIComponent(html)))
+				};
+				AppCmds.httpResponse(reqInfo.id, JSON.stringify(val));
+			},300);
+		};
+		Runtime.Log("HttpServer 已运行，通过此地址访问： http://127.0.0.1:"+port+"/path?k=1&v=abc",2);
+	}catch(e){
+		Runtime.Log("HttpServer Error:"+e.message,1);
+	}
+	
 	/**验证load接口**/
 	Runtime.Log("load async start...");
 	AppCmds.load(JSON.stringify({
@@ -65,6 +97,9 @@
 				Runtime.Log("文件base64读取："+lineAll2,lineAll2==lineAll?2:1);
 
 				AppCmds.closeRes(read);
+				
+				var size=AppCmds.fileSize(file);
+				Runtime.Log("文件大小："+size,size==lineAll.length?2:1);
 			}catch(e){
 				Runtime.Log("File Error:"+e.message,1);
 			}

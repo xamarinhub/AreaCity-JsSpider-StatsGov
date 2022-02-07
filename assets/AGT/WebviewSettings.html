@@ -38,6 +38,7 @@ var AppCalls={
 	,onTransformStart:function(execName){
 		AppCalls.scope={execName:execName,tgEnable:"",tgCount:0,tgpCount:0};
 		Runtime.UpdateStatus("");
+		Runtime.Log("[系统] 执行任务中:"+execName,"#bbb");
 		
 		var fn=Runtime.AppCalls.onTransformStart;
 		if(fn){
@@ -53,6 +54,7 @@ var AppCalls={
 		};
 	}
 	,onTransformEnd:function(){
+		Runtime.Log("[系统] 执行任务结束","#bbb");
 		var fn=Runtime.AppCalls.onTransformEnd;
 		if(fn){
 			fn();
@@ -61,7 +63,12 @@ var AppCalls={
 		};
 	}
 };
-var LM="2021-2-10 16:02:51";
+
+var appFixLineClick=function(){
+	alert("请先执行内置脚本 “"+$("option[value=fixline]").text()+"” 后，在来FixLine操作");
+};
+
+var LM="2022-01-07 19:37";
 </script>
 
 <style>
@@ -75,6 +82,7 @@ pre{
 }
 a{
 	text-decoration: none;
+	cursor: pointer;
 	color:#06c;
 }
 a:hover{
@@ -281,7 +289,12 @@ select,select option{
 	<option value="to_wgs84">[插件] 转成 CGCS2000 天地图 [误差约10米内] ≈GPS</option>
 	
 	<option value=""></option>
-	<option value="">==== 省市区镇转SQL、导入数据库 ====</option>
+	<option value="">==== 工具集 ====</option>
+	<option value="geojson_level_split">[拆分] GeoJSON 按省市区将下级拆分到多个文件</option>
+	<option value="geojson_merge">[合并] GeoJSON 多个文件合并成一个文件</option>
+	
+	<option value=""></option>
+	<option value="">==== 行政区划转SQL、导入数据库 ====</option>
 	<option value="exec/city_to_sql">[转换] ok_data_level*.csv 省市区镇转SQL</option>
 	<option value="exec/city_to_db">[导入] ok_data_level*.csv 省市区镇导入数据库</option>
 	
@@ -289,13 +302,14 @@ select,select option{
 	<option value="">==== 其他代码 ====</option>
 	<option value="gps_to_gcj02">[Test] WGS-84 GPS/CGCS2000 转成 GCJ-02</option>
 	<option value="gps_to_bd09">[Test] WGS-84 GPS/CGCS2000 转成 BD-09</option>
+	<option value="fixline">[Test] FixLine 修复CSV文件内错误边界数据</option>
 	<option value="exec/appcmds_test">[Test] 浏览器接口测试用例</option>
 </select>
 </script>
 
 
-<script src="https://cdn.jsdelivr.net/gh/xiangyuecn/Recorder@latest/assets/ztest-jquery.min-1.9.1.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/xiangyuecn/Recorder@latest/assets/ztest-codemirror.min.5.48.4.js"></script>
+<script src="https://xiangyuecn.gitee.io/recorder/assets/ztest-jquery.min-1.9.1.js"></script>
+<script src="https://xiangyuecn.gitee.io/recorder/assets/ztest-codemirror.min.5.48.4.js"></script>
 
 <script>
 (function(){
@@ -366,6 +380,11 @@ window.Runtime={
 	}
 	,LogClear:function(){
 		$(".mainLog").html("");
+	}
+	,ToPre:function(obj, attr){
+		var val=JSON.stringify(obj,null,'    ')||"";
+		val=val.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+		return '<pre '+attr+'>'+val+'</pre>';
 	}
 	
 	
@@ -525,6 +544,9 @@ Runtime.SetCode=function(val){
 	edit.refresh();
 	codeChange(val);
 };
+Runtime.GetCode=function(){
+	return elem.val();
+};
 
 var codeChange=function(val,reset){
 	if(reset || val!=prevCode){
@@ -622,6 +644,7 @@ AppCmds.ready();
 	Runtime.Ctrls(ctrls) 在控制区显示按钮，只能调用一次，ctrls:[{name:"按钮名称",click:"函数名称",cls:"class name"},{html:"html代码"},...]
 	
 	Runtime.Log(msgHtml,color) 在日志区显示日志html，color:0默认，1红色，2绿色，其他指定颜色
+	Runtime.ToPre(obj, attr) 将对象用JSON格式化，然后返回pre标签html，用于Log打印对象，attr为pre标签的属性
 	
 	Runtime.LogClear() 清除显示的日志
 	
@@ -629,6 +652,7 @@ AppCmds.ready();
 	
 	Runtime.Load(url|set,True,False) 调用AppCmds.load加载资源，True(val,data)，False(msg, data)
 	
+	Runtime.GetCode() 获取输入框内的代码
 	Runtime.SetCode(code) 输入框内显示代码
 	
 	Runtime.UpdateStatus(msg) 更新显示状态信息
@@ -641,7 +665,15 @@ AppCmds.ready();
 var showCmds=function(){
 	Runtime.Log('<pre>'+$(".tp_pageCmds").html()+'</pre>'+AppCmds.help());
 };
-Runtime.Log("当前环境：<pre>LM: "+LM+"\n\nURL: "+location.href+"\n\nUA:"+navigator.userAgent+"\n\nApp: "+InitReadConfig.AppName+"["+InitReadConfig.AppVersion+"]</pre>");
+var showConfig=function(){
+	var val=JSON.stringify(JSON.parse(AppCmds.config()),null,'    ');
+	val=val.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+	$(".showConfigBox").html('<pre style="padding:5px;border:1px solid #eee">>> AppCmds.config() '+new Date().toLocaleString()+'\n'+val+'</pre>');
+};
+Runtime.Log('当前环境：'
+	+"<pre>LM: "+LM+"\n\nURL: "+location.href+"\n\nUA: "+navigator.userAgent+"\n\nApp: "+InitReadConfig.AppName+"["+InitReadConfig.AppVersion+"]\n\nID: "+InitReadConfig.AppID+"</pre>"
+	+'<div class="Right"><a onclick="showConfig()" style="font-size:12px" title="点击查看AppCmds.config()信息">点击展开更多信息</a></div>'
+	+'<div class="showConfigBox"></div>');
 Runtime.Log("小提示：择一个内置插件并应用后，此插件可以作用到其他脚本，因此可以先后执行不同的脚本组成不同的数据处理结果。");
 Runtime.Log("脚本运行环境已准备好，每次修改脚本后需要点击应用才会生效哦。",2);
 </script>

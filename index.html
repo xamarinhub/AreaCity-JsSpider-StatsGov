@@ -102,15 +102,15 @@ img{
 		
 		<div style="padding-top:10px">
 			<span class="lb">小提示 :</span>
-			本工具是用来转换省市区镇四级数据为js支持的格式的，不支持导入数据库，也不支持处理坐标和城市边界范围书记，如果你要导入数据库、或转换坐标和城市边界范围数据（如shp、geojson、sql），<a href="assets/AreaCity-Geo-Transform-Tools.html" target="_blank">请点此处下载《AreaCity-Geo格式转换工具软件》</a>轻松处理。
+			本工具是用来转换省市区镇四级行政区划数据为js支持的格式的，不支持导入数据库，也不支持处理坐标和城市边界范围书记，如果你要导入数据库、或转换坐标和城市边界范围数据（如shp、geojson、sql），<a href="assets/AreaCity-Geo-Transform-Tools.html" target="_blank">请点此处下载《AreaCity-Geo格式转换工具软件》</a>轻松处理。
 		</div>
 		<div style="padding-top:10px">
 			<span style="margin-right:20px">
-				<span class="lb">【四级】省市区镇 4级数据 :</span> <a href="assets/download.html" target="_blank">点此下载</a>
+				<span class="lb">【四级】省市区镇 4级区划数据 :</span> <a href="assets/download.html" target="_blank">开源下载</a>
 			</span>
 			
 			<span style="margin-right:20px">
-				<span class="lb">【GEO三级】省市区 坐标+边界范围 :</span> <a href="assets/download.html" target="_blank">点此下载</a>
+				<span class="lb">【GEO三级】省市区 坐标+边界范围 :</span> <a href="assets/download.html" target="_blank">开源下载</a>
 			</span>
 			
 			<span style="margin-right:20px">
@@ -126,6 +126,13 @@ img{
 	<script>var AreaFormatBoxElem=document.querySelector(".main")</script>
 	<script src="测试和WEB数据格式转换工具.js"></script>
 
+	<div class="mainBox">
+		<div style="font-size: 24px;font-weight: bold;padding-bottom:10px">数据版本</div>
+		<div class="geoVerDateView"></div>
+		<script src="assets/csv-ver-date.js"></script>
+		<script>document.querySelector(".geoVerDateView").innerHTML=CsvPubDate.TableHTML({level4:true});</script>
+	</div>
+	
 	<div class="mainBox DonateLogs"></div>
 </div>
 

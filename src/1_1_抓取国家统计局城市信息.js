@@ -4,6 +4,8 @@
 在以下页面执行
 http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/
 
+采集中途失败了，直接刷新页面重新采集，浏览器有页面缓存，恢复速度极快
+【如果乱码】2021版页面已是 utf-8 无乱码
 可能需要低版本chrome，不然他们网页gbk格式的请求会乱码，chrome 41没有乱码，Chrome 46这版本win10能用。或者篡改Content-Type响应头为Content-Type: text/html; charset=gb2312也可解决新版Chrome乱码问题，比如：FildderScript OnBeforeResponse中添加：
 ```
 if (oSession.HostnameIs("www.stats.gov.cn")){
@@ -14,7 +16,7 @@ if (oSession.HostnameIs("www.stats.gov.cn")){
 ```
 */
 (function(){
-var Year=2020;
+var Year=2021;
 var LoadMaxLevel=4;//采集几层
 var SaveName="Step1_1_StatsGov";
 var Level={
@@ -46,7 +48,10 @@ function ajax(url,True,False){
 	ajax.onreadystatechange=function(){
 		if(ajax.readyState==4){
 			if(ajax.status==200){
-				True(ajax.responseText);
+				True(ajax.responseText
+					.replace(/[\r\n]+/g," ") //单行处理
+					.replace(/"/g,"'") //引号全部统一
+				);
 			}else{
 				False();
 			}
@@ -160,7 +165,7 @@ function load_x_childs(itm, next){
 			};
 			
 			//villagetr直接非法
-			var reg2=/class='(citytr|countytr|towntr)'.+?<td>(?:<a href='(.+?)'>)?(.+?)<.+?>([^<>]+)(?:<\/a>)?<\/td><\/tr>/ig;
+			var reg2=/class='(citytr|countytr|towntr)'.+?<td>(?:<a href='(.+?)'>)?(.+?)<.+?>([^<>]+)(?:<\/a>)?<\/td>\s*<\/tr>/ig;
 			var match2;
 			if(match2=reg2.exec(match[0])){
 				var url=match2[2]||"";
