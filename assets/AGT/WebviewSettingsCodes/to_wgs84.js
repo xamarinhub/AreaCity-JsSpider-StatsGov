@@ -123,6 +123,22 @@ Runtime.Ctrls([
 ]);
 
 window.wgs84Test=function(){
+	//https://github.com/Artoria2e5/PRCoords/blob/master/js/PRCoords.js 另一种算法
+	/*test_translateGeos.randomTest(3,10000,function(lng,lat){
+		var o=PRCoords.wgs_gcj({lon: lng,lat:lat});
+		return {lng:o.lon,lat:o.lat}
+	},function(lng,lat){
+		var o=PRCoords.gcj_wgs({lon: lng,lat:lat});
+		return {lng:o.lon,lat:o.lat}
+	});*/
+	test_translateGeos.randomTest(3,10000,function(lng,lat){
+		var o=gcj_encrypt(lat,lng);
+		return {lng:o.lon,lat:o.lat}
+	},function(lng,lat){
+		var o=gcj_decrypt(lng,lat);
+		return {lng:o.lon,lat:o.lat}
+	});
+	
 	test_translateGeos("WGS84");
 };
 

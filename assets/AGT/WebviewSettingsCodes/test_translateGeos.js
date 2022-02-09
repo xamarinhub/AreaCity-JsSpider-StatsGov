@@ -57,8 +57,8 @@ window.test_translateGeos=function(toType,loop){
 	html.push('</table>');
 	
 	Runtime.Log(
-		(toType=="WGS84"?"测试用的真实WGS84坐标为Google卫星地图上先手动获取的原始粗略GPS坐标点，并经过高德地图官方接口反向转换后进行微调，使GPS坐标转换成高德坐标和原始高德坐标一致，但两个坐标在各自卫星地图上观察存在10米内的偏差(海拔越高偏差越厉害？)。<br>":"")
-		+(toType=="BD09"?"测试用的真实BD09坐标采用百度地图的官方接口从GCJ02转换而来，并经过高德地图官方接口反向校对，虽然都是官方接口，但两个坐标在各自卫星地图上观察存在1米内的误差(应该是不同地图之间的自有误差)。<br>":"")
+		(toType=="WGS84"?"测试用的真实WGS84坐标为Google卫星地图上先手动获取的原始粗略GPS坐标点，并经过高德地图官方接口反向转换后进行微调，使GPS坐标转换成高德坐标和原始高德坐标一致，但两个坐标在各自卫星地图上观察存在10米内的偏差(应该是不同卫星图片之间的误差，海拔越高偏差越大？)。<br>":"")
+		+(toType=="BD09"?"测试用的真实BD09坐标采用百度地图的官方接口从GCJ02转换而来，并经过高德地图官方接口反向校对，虽然都是官方接口，但两个坐标在各自卫星地图上观察存在1米内的误差(应该是不同卫星图片之间的误差)。<br>":"")
 		
 		+count+"次坐标计算共耗时"+(t2-t1)+"ms，单个："+ms+"ms"
 		+html.join("\n"));
@@ -207,12 +207,48 @@ var Points=[
 
 
 
+test_translateGeos.randomTest=function(testCount,loop,enc,dec){
+	for(var i=0;i<testCount;i++){
+		var t1=Date.now();
+		var val=rndTest(loop,enc,dec);
+		Runtime.Log('随机'+loop+'个坐标加密后再还原，经纬度平均误差[耗时'+(Date.now()-t1)+'ms]：'
+			+'<div style="padding-left:70px">'+val.lng.toFixed(6)+" "+val.lat.toFixed(6)
+			+' ('+GetDistance(100,30,100+val.lng,30+val.lat).toFixed(2)+'米)'
+			+' , 最大误差'+val.lngM.toFixed(6)+" "+val.latM.toFixed(6)
+			+' ('+GetDistance(100,30,100+val.lngM,30+val.latM).toFixed(2)+'米)'
+			+'</div>');
+	}
+};
+var rndTest=function(loop,enc,dec){
+	var lngX=0,latX=0,lngM=0,latM=0;
+	for(var i=0;i<loop;i++){
+		do{
+			var lng=+(73+Math.random()*100).toFixed(6);
+			var lat=+(1+Math.random()*100).toFixed(6);
+		}while(lng>137 || lat>55);
+		var e=enc(lng,lat);
+		var d=dec(e.lng,e.lat);
+		
+		var lng_=+Math.abs(lng-d.lng).toFixed(6);
+		var lat_=+Math.abs(lat-d.lat).toFixed(6);
+		lngX+=lng_;
+		latX+=lat_;
+		lngM=Math.max(lngM,lng_);
+		latM=Math.max(latM,lat_);
+	}
+	return {
+		lng:+(lngX/loop).toFixed(6), lat:+(latX/loop).toFixed(6)
+		,lngM:lngM, latM:latM
+	};
+};
+
+
 
 /*
 获取两个坐标的距离，单位米
 GetDistance(lng1, lat1, lng2, lat2)
 */
-var GetDistance=(function(){
+var GetDistance=test_translateGeos.GetDistance=(function(){
 	var fD=function(a, b, c) {
 		for (; a > c;)
 			a -= c - b;
