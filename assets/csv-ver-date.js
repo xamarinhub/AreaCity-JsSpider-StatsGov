@@ -6,15 +6,27 @@
 (function(){
 var OpenVer="2021.210510.220114",OpenDate="2022-02-06";
 
+var UrlRoot="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/";
+var UrlTool=UrlRoot+"assets/AreaCity-Geo-Transform-Tools.html";
+var UrlEcharts=UrlRoot+"assets/geo-echarts.html";
+var Url=function(txt,url,index){
+	if(url==UrlRoot && window.PageIsRootIndex){
+		return '<a href="'+index+'">'+txt+'</a>';
+	}
+	return '<a href="'+url+'" target="_blank">'+txt+'</a>'
+};
+var GeoTips='使用'+Url("转换工具软件",UrlTool)+'可以导入数据库、转换成shp、geojson、sql格式、转换坐标系';
 var CsvPubDate=window.CsvPubDate={
 	Level4:{
 		name:"省市区镇四级行政区划数据"
+		,desc:'['+Url("下载",UrlRoot+"assets/download.html")+']['+Url("在线预览",UrlRoot,"#tools")+'][<span style="color:#0a0">免费开源</span>] 包含字段：城市id、城市name、上级pid、拼音；支持'+Url("在线转换",UrlRoot,"#tools")+'成三级、四级联动JavaScript代码，使用'+Url("转换工具软件",UrlTool)+'可以导入数据库。本数据源自： 统计局、民政部、腾讯地图行政区划、高德地图行政区划，从这四大平台整合。'
 		,file:"ok_data_level4.csv"
 		,version:OpenVer
 		,date:OpenDate
 	}
 	,Geo:{
 		name:"省市区三级坐标边界数据"
+		,desc:'['+Url("下载",UrlRoot+"assets/download.html")+']['+Url("在线预览",UrlEcharts)+'][<span style="color:#0a0">免费开源</span>] 包含字段：矢量边界polygon、城市中心坐标geo、城市id、城市pid、城市名称name；'+GeoTips+'。本数据源自：高德地图开放平台，通过开放接口获取。'
 		,file:"ok_geo.csv"
 		,version:OpenVer
 		,date:OpenDate
@@ -22,6 +34,7 @@ var CsvPubDate=window.CsvPubDate={
 	
 	,Geo4:{
 		name:"乡镇第4级坐标边界数据"
+		,desc:'['+Url("下载",UrlRoot+"assets/geo-level4.html")+']['+Url("在线预览",UrlEcharts)+'][<span style="color:#fa0">付费数据</span>] 包含字段：矢量边界polygon、中心坐标centroid_geo、编号id、上级区县pid、乡镇名称name；'+GeoTips+'。本数据源自：第三方购买、公开数据源采集。'
 		,file:"ok_geo4_ETD220206.csv"
 		,version:"ETD220206"
 		,dates:{//年-月 A排序年.月
@@ -60,6 +73,7 @@ CsvPubDate.TableHTML=function(set){
 	.GeoPubDateTitle2{color:#666;margin-left:30px}\
 	.GeoPubDateTitle3{color:#aaa;font-weight: bold}\
 	.GeoPubDateName{font-weight: bold;}\
+	.GeoPubDateDesc{font-size:14px;padding:5px 0;color:#888}\
 </style>\
 <table class="GeoPubDateTable" style="border-collapse: collapse;min-width: 100%;text-align: center;font-size:16px">\
 	<tbody>'];
@@ -76,6 +90,7 @@ if(set.level4){
 	+'<span class="GeoPubDateTitle">'+Level4.name+'</span>'
 	+'<span class="GeoPubDateTitle2">文件名: '+Level4.file+'</span>'
 	+'<span class="GeoPubDateTitle2">最新版本: '+Level4.version+'</span>'
+	+'<div class="GeoPubDateDesc">'+Level4.desc+'</div>'
 	+'</div></td></tr>\
 	<tr><td class="GeoPubDateTitle3">省份名称</td>\
 		<td class="GeoPubDateName">全国所有省</td>\
@@ -95,6 +110,7 @@ if(set.geo){
 	+'<span class="GeoPubDateTitle">'+Geo.name+'</span>'
 	+'<span class="GeoPubDateTitle2">文件名: '+Geo.file+'</span>'
 	+'<span class="GeoPubDateTitle2">最新版本: '+Geo.version+'</span>'
+	+'<div class="GeoPubDateDesc">'+Geo.desc+'</div>'
 	+'</div></td></tr>\
 	<tr><td class="GeoPubDateTitle3">省份名称</td>\
 		<td class="GeoPubDateName">全国所有省</td>\
@@ -115,6 +131,7 @@ if(set.geo4){
 		+'<span class="GeoPubDateTitle">'+Geo4.name+'</span>'
 		+'<span class="GeoPubDateTitle2">文件名: '+Geo4.file+'</span>'
 		+'<span class="GeoPubDateTitle2">最新版本: '+Geo4.version+'</span>'
+		+'<div class="GeoPubDateDesc">'+Geo4.desc+'</div>'
 		+'</div></td></tr>'
 	);
 	
