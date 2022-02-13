@@ -35,7 +35,7 @@ geoECharts.load(); //开始加载数据，加载成功后会显示图形
 *************************/
 	var lib={
 		//echarts js路径，如果不提供echarts将从这个地方加载js文件，path_try为备用线路
-		path:"https://cdn.bootcdn.net/ajax/libs/echarts/4.9.0-rc.1/echarts.min.js"
+		path:"echarts.4.9.0.min.js" //改成你自己的路径
 		,path_try:"https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"
 	};
 	var NOOP=function(){};

@@ -407,7 +407,7 @@ var geoECharts=geoEChartsLib.Create({
 			var o=levels[i];
 			html.push('<a onclick="goLevel('+i+')">'+o.name+'</a>');
 		};
-		var tips="路径："+html.join(" > ");
+		var tips="单击地图进入下一级，当前路径："+html.join(" > ");
 		
 		if(cur.level==3 && !/^(8|4420|4403)/.test(cur.id)){
 			var msg='当前为乡镇级别边界（付费数据），只有是最后一个乡镇【'+mapDatas[mapDatas.length-1].name+'】是最高80个采样数的粗略边界，其他的乡镇均为边界外接矩形（4个坐标点），仅供测试（深圳、中山、香港、澳门无此限制）';
