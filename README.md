@@ -14,10 +14,10 @@
 可在 [GitHub Releases](https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov/releases) 中下载最新发布数据文件，也可直接打开 `src/采集到的数据` 文件夹内的文件来使用。
 
 如果无法打开GitHub或者下载缓慢可以通过 [Gitee Pages外链](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/download.html) 来下载：
-- [【下载】省市区 三级行政区划数据](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/src/采集到的数据/ok_data_level3.csv) ： /src/采集到的数据/ok_data_level3.csv ；
--  [【下载】省市区镇 四级行政区划数据](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/src/采集到的数据/ok_data_level4.csv) ： /src/采集到的数据/ok_data_level4.csv (3M+大小) ；
-- [【下载】【GEO三级】省市区 坐标和边界 数据下载](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/src/采集到的数据/ok_geo.csv.7z) ： /src/采集到的数据/ok_geo.csv.7z (解压后130M+) ；
-- [【下载】【GEO四级】乡镇 坐标和边界 数据下载](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/geo-level4.html) [AD]： 乡镇第4级坐标边界数据 ok_geo4_*.csv，为付费数据 （广告、闭源） 。
+- [【下载】省市区 三级行政区划数据](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/src/采集到的数据/ok_data_level3.csv) ： /src/采集到的数据/ok_data_level3.csv (200KB+)；
+-  [【下载】省市区镇 四级行政区划数据](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/src/采集到的数据/ok_data_level4.csv) ： /src/采集到的数据/ok_data_level4.csv (3MB+大小) ；
+- [【下载】【GEO三级】省市区 坐标和边界 数据下载](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/src/采集到的数据/ok_geo.csv.7z) ： /src/采集到的数据/ok_geo.csv.7z (13MB+压缩包 解压后130M+) ；
+- [【下载】【GEO四级】乡镇 坐标和边界 数据下载](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/geo-level4.html) [AD]： 乡镇第4级坐标边界数据 ok_geo4_*.csv，为付费数据 （广告、闭源，90MB+压缩包 导出后300M+） 。
 
 > csv纯文本文件可以非常方便解析成其他格式；如果在使用csv文件过程中出现乱码、错乱等情况，需自行调对utf-8（带BOM）编码，文本限定符为`"`。
 > 
@@ -182,7 +182,7 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 
 参考 `肃宁县（右下方向那块飞地）`、`路南区（唐山科技职业技术学院那里一段诡异的边界）` 边界，~~百度数据大量线段交叉的无效`polygon`(百度已更新，不能复现了)~~（[百度地图测试](http://lbsyun.baidu.com/jsdemo.htm#c1_10)），没有人工无法修[​](?FixGitee_Block)正，高德没有这个问题（[高德地图测试](https://lbs.amap.com/api/javascript-api/example/district-search/draw-district-boundaries)）；
 
-并且高德对镂空性质的地块处理比百度强，参考`天津市`对`唐山`大块飞地的处理，高德数据只需要`Union`操作就能生成`polygon`，百度既有`Union`操作又有`Difference`操作，极其复杂数据还无效。
+并且高德对镂空性质(Hole)的地块处理比百度强，参考`池州市`对`铜陵市`的飞地处理，高德数据只需要`Union`操作就能生成`polygon`，百度如果不计算位置关系，是完全不知道应该进行`Union`操作还是`Difference`操作，极其复杂数据还无效。
 
 所以放弃使用百度地图数据。
 
