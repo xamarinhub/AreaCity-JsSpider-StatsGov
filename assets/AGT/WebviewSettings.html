@@ -68,7 +68,7 @@ var appFixLineClick=function(){
 	alert("请先执行内置脚本 “"+$("option[value=fixline]").text()+"” 后，在来FixLine操作");
 };
 
-var LM="2022-01-07 19:37";
+var LM="2022-02-19 14:57";
 </script>
 
 <style>
@@ -355,6 +355,13 @@ window.Runtime={
 			var elem=doc.createElement("script");
 			elem.setAttribute("type","text/javascript");
 			elem.setAttribute("src",url+"?t="+Date.now());
+			if(!("onload" in elem)){//ie 8
+				elem.onreadystatechange=function(){
+					if(elem.readyState=="loaded"){
+						load(idx+1);
+					}
+				}
+			}
 			elem.onload=function(){
 				load(idx+1);
 			};
@@ -421,9 +428,10 @@ window.Runtime={
 };
 
 
-$(window).bind("error",function(e){
-	Runtime.Log('【Error】:<pre>'+(e.error?e.error.stack:event.message)+'</pre>',1);
-});
+window.onerror=function(message, url, lineNo, columnNo, error){
+	//https://www.cnblogs.com/xianyulaodi/p/6201829.html
+	Runtime.Log('<span style="color:red">【Uncaught Error】'+message+'<pre>'+"at:"+lineNo+":"+columnNo+" url:"+url+"\n"+(error&&error.stack||"不能获得错误堆栈")+'</pre></span>',1);
+};
 })();
 </script>
 
@@ -608,25 +616,9 @@ Runtime.Mask=function(msg){
 try{
 	InitReadConfig=JSON.parse(AppCmds.config());
 }catch(e){
-	Runtime.Mask("非工具软件环境，不支持运行本网页!");
+	InitReadConfig.NotApp=true;
 	return;
 };
-
-var IsIE=false,IEVersion=99;
-(function(){
-	var ua=navigator.userAgent,m;
-	m=/MSIE.+?(\d+)|Trident.+?rv:(\d+)/i.exec(ua);
-	if(m){
-		IsIE=true;
-		IEVersion=+(m[1]||m[2]);
-	};
-})();
-if(IEVersion<11){
-	Runtime.Mask("当前使用的IE"+IEVersion+"太过老旧，请重启本软件再试");
-	return;
-};
-
-AppCmds.ready();
 
 })();
 </script>
@@ -677,6 +669,51 @@ Runtime.Log('当前环境：'
 Runtime.Log("小提示：择一个内置插件并应用后，此插件可以作用到其他脚本，因此可以先后执行不同的脚本组成不同的数据处理结果。");
 Runtime.Log("脚本运行环境已准备好，每次修改脚本后需要点击应用才会生效哦。",2);
 </script>
+
+
+
+
+
+<script>
+(function(){
+
+if(!InitReadConfig.NotApp){
+	AppCmds.ready();
+}else{
+	for(var i=0;i<10;i++){
+		Runtime.Log("警告：非工具软件环境，不支持运行本网页!",1);
+	}
+};
+
+window.IsIE=false;
+window.IEVersion=99;
+var ua=navigator.userAgent,m;
+m=/MSIE.+?(\d+)|Trident.+?rv:(\d+)/i.exec(ua);
+if(m){
+	IsIE=true;
+	IEVersion=+(m[1]||m[2]);
+};
+
+})();
+
+
+if(IEVersion<11){
+	Runtime.Log("兼容问题提醒：当前网页使用的IE"+IEVersion+'太过老旧，本脚本页面可能无法正常工作，请到微软官网<a href="https://support.microsoft.com/zh-cn/help/17621" target="_blank">升级IE11</a>以获得最佳兼容。',"#f90");
+	
+	//老浏览器，给予一些基础兼容支持
+	if(!"".trim)String.prototype.trim=function(){return $.trim(this)};
+	if(!Date.now)Date.now=function(){return new Date().getTime()};
+	if(!Object.keys)Object.keys=function(o){var a=[];for(var k in o)if(o.hasOwnProperty(k))a.push(k);return a};
+	
+	if(!window.atob){//挂在window.下面IE8没有错误信息
+		var atob=function(){throw new Error("浏览器版本太低，不支持atob、btoa！")};
+		var btoa=atob;
+	};
+};
+</script>
+
+
+
 <div style="width:0;height:0;overflow:hidden;">
 	<img src="https://ia.51.la/go1?id=20807127&pvFlag=1">
 </div>
