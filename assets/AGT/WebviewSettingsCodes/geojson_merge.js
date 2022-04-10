@@ -26,8 +26,10 @@ Runtime.Ctrls([
 <div style="font-size:13px;">\
 <div style="padding:8px 0">\
 	GeoJSON文件筛选正则表达式：\
-	<input class="fileNameExp" style="width:160px;color:blue" value="\\.(geo)?json$">\
-	（不区分大小写，只有文件名称匹配的文件会被合并，留空将匹配所有文件）\
+	<input class="fileNameExp" style="width:240px;color:blue" value="\\.(geo)?json$">\
+	（不区分大小写，只有文件名称匹配的文件会被合并，留空将匹配所有文件，\
+	<a onclick="$(\'.fileNameExp\').val(\'^(.(?!_single))+\\\\.(geo)?json$\')"\
+		>排除_single文件</a>）\
 </div>\
 </div>\
 	</div>'}

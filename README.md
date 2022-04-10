@@ -32,7 +32,7 @@
 [​](?)
 
 
-<p align="center"><a href="https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov"><img width="100" src="https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/icon.png" alt="AreaCity logo"></a></p>
+<p align="center"><a href="https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov"><img width="100" src="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/icon.png" alt="AreaCity logo"></a></p>
 
 <p align="center">
   <a title="Stars" href="https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov"><img src="https://img.shields.io/github/stars/xiangyuecn/AreaCity-JsSpider-StatsGov?color=15822e&logo=github" alt="Stars"></a>
@@ -63,7 +63,7 @@ git clone --depth 1 https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov.git
 
 欢迎加QQ群：484560085，纯小写口令：`areacity`
 
-<img src="https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/qq_group_484560085.png" width="220px">
+<img src="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/qq_group_484560085.png" width="220px">
 
 
 
@@ -157,7 +157,7 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 
 
 ## 案例效果
-[<img src="https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/use_picker.gif" width="280px">](https://jiebian.life/start/test/app?picker=1) [<img src="https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/use_select.png" width="460px">](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/)
+[<img src="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/use_picker.gif" width="280px">](https://jiebian.life/start/test/app?picker=1) [<img src="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/use_select.png" width="460px">](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/)
 
 
 
@@ -187,7 +187,7 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 5. 网页版省市区多级联动js代码生成（含数据）。
 
 ## 效果图
-![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/tools.png)
+![](assets/tools.png)
 
 
 
@@ -230,6 +230,10 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 
 # :open_book:坐标和行政区域边界范围
 
+## 在线测试和预览
+坐标边界范围在线测试预览地址：[ECharts Map四级下钻在线测试和预览+代码生成](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/geo-echarts.html)
+
+
 ## 数据源
 使用高德接口采集的，本来想采百度地图的，但经过使用发现百度地图数据~~有严重问题(百度已更新，不能复现了)~~：
 
@@ -238,10 +242,6 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 并且高德对镂空性质(Hole)的地块处理比百度强，参考`池州市`对`铜陵市`的飞地处理，高德数据只需要`Union`操作就能生成`polygon`，百度如果不计算位置关系，是完全不知道应该进行`Union`操作还是`Difference`操作，极其复杂数据还无效。
 
 所以放弃使用百度地图数据。
-
-
-## 在线测试和预览
-坐标边界范围在线测试预览地址：[ECharts Map四级下钻在线测试和预览+代码生成](https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/geo-echarts.html)
 
 
 
@@ -266,10 +266,10 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 
 ## 省市区三级边界效果
 
-![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/geo-sheng.gif) ![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/geo-guangdong.gif)
+![](assets/geo-sheng.gif) ![](assets/geo-guangdong.gif)
 
 ## 乡镇第4级边界效果
-![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/geo-level4/preview-free.png) ![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/geo-level4/z01.png)
+![](assets/geo-level4/preview-free.png) ![](assets/geo-level4/z01.png)
 
 
 
@@ -286,9 +286,9 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 
 **相关截图：**
 
-![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/AGT-Images/sy-4.png)
+![](assets/AGT-Images/sy-4.png)
 
-![](https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov/raw/master/assets/AGT-Images/sy-2.png)
+![](assets/AGT-Images/sy-2.png)
 
 
 
@@ -399,4 +399,4 @@ polygon|string|行政区域边界，高德地图`GCJ-02`火星坐标系。格式
 
 您也可以使用支付宝或微信打赏作者：
 
-![](https://gitee.com/xiangyuecn/Recorder/raw/master/assets/donate-alipay.png)  ![](https://gitee.com/xiangyuecn/Recorder/raw/master/assets/donate-weixin.png)
+![](https://xiangyuecn.gitee.io/recorder/assets/donate-alipay.png)  ![](https://xiangyuecn.gitee.io/recorder/assets/donate-weixin.png)

@@ -6,7 +6,7 @@
 本代码用于将一个大的 geojson 文件，根据pid、ext_path字段自动拆分成单独的小文件，子级数据默认会放在父级id命名的文件夹内。
 
 ``` Ref
-全部数据将会拆分出：一个仅包含所有省份的文件；每个省份各一个文件，内容为此省份所有的市；每个市各一个文件，内容为此市所有的区县；每个区县各一个文件，内容为此区县所有的乡镇。
+全部数据将会拆分出：一个仅包含所有省份的文件；每个省份各一个文件，内容为此省份所有的市；每个市各一个文件，内容为此市所有的区县；每个区县各一个文件，内容为此区县所有的乡镇；[可选]每个省市区单独一个文件，内容为对应的一条边界数据；[可选]每个乡镇单独一个文件，内容为此乡镇一条边界数据。
 
 【拆分规则演示】
 	1. 拆分出  全国  所有的省级到一个文件
@@ -17,7 +17,14 @@
 			得到 4201.json   包含了武汉所有的区县；
 	4. 拆分出 武昌区 所有的乡镇级到一个文件
 			得到 420106.json 包含了武昌所有的乡镇街道；
-	5. 其他的省市区按上面规则拆分得到对应文件。
+	5. [可选]拆分出每个 省市区 到单独一个文件
+			得到 42_single.json   只包含湖北省一个边界
+			得到 4201_single.json 只包含武汉市一个边界
+			得到420106_single.json只包含武昌区一个边界
+	6. [可选]拆分出 黄鹤楼街道 到单独一个文件
+			得到 420106003_single.json 只含黄鹤楼街道
+			一个乡镇边界；
+	7. 其他的省市区县乡镇按上面规则拆分得到对应文件；
 	
 【拆分子目录结构】 
 	- /0.json
@@ -33,8 +40,20 @@
 			某区下所有乡镇：/0/42/目录内每个市均有一个
 			文件夹，里面存放着此市每个区县的json文件，
 			每个json内为此区县的所有乡镇。
+			
+	- /0/42_single.json
+	  /0/42/4201_single.json
+	  /0/42/4201/420106_single.json
+			可选省市区单独一个文件：每个文件内只含对应
+			的省市区一条边界数据。
+	- /0/42/4201/420106/420106003_single.json
+			可选某乡镇单独一个文件：/0/42/4201目录内每
+			个区县均有一个文件夹，里面存放着此区县每个
+			乡镇的json文件，每个json内只含此乡镇。
+	
 	- 当配置项勾选了“不要创建上级目录”时，所有子文件将放一个文件夹里面，不会出现本目录结构。
-	- 上面路径中的 0、42、4201 均为pid，实际为每个省市区的不同id值，当配置项勾选了“文件或目录使用城市名称”时，数将会被城市名称代替。
+	- 当配置勾选了“每条数据单独生成一个文件”时，才会将每个乡镇拆分到单独的一个文件，这些文件内只会有这个乡镇一条数据；省市区也会生成单独的一个默认用_single结尾的文件，只包这个城市一条数据；当同时勾选了“不要生成包含所有下一级数据的文件”时，不会生成不带_single结尾的那些上级文件。
+	- 上面路径中的 0、42、4201、420106 均为pid，实际为每个省市区的不同id值，当配置项勾选了“文件或目录使用城市名称”时，数将会被城市名称代替。
 
 
 【注意】本代码只能拆分固定的换行风格的geojson文件（类似本工具导出的json文件内容风格），因为要简化对文本的处理，本代码要求每条数据文本均独占一行，所以如果一行有多条数据、一条数据占了多行，均不支持处理。
@@ -70,13 +89,32 @@ Runtime.Ctrls([
 		<input type="checkbox" class="childFolderDisable" />不要创建上级目录，所有子文件放一个文件夹里\
 	</label>\
 </div>\
+<div style="padding-top:8px">\
+	<label style="cursor: pointer">\
+		<input type="checkbox" class="splitToSingle" />每条数据单独生成一个文件（每个 省、市、区县、乡镇 均生成仅一条数据的一个文件）\
+	</label>\
+</div>\
+<div class="splitToSingleMore" style="padding-left:50px;display:none">\
+	<div style="padding-top:8px;padding-left:5px">\
+		<input style="width:60px" value="_single" class="singleFileSuffix">\
+		文件名后缀（可空，为空时必须勾选下面这个选项）\
+	</div>\
+	<div style="padding-top:8px">\
+		<label style="cursor: pointer">\
+			<input type="checkbox" class="singleFileOnly" />不要生成包含所有下一级数据的文件（指不带_single结尾的那些上级文件）\
+		</label>\
+	</div>\
+</div>\
 </div>\
 	</div>'}
 	
 	,{name:"开始拆分",click:"runClick"}
 	,{html:'<span style="color:#0b1">本拆分功能免费版、付费版均可无限制使用</span>'}
 ]);
-var childFolderDisable,pathUseName;
+$(".splitToSingle").click(function(){
+	$(".splitToSingleMore")[this.checked?"show":"hide"]();
+});
+var childFolderDisable,pathUseName,splitToSingle,singleFileSuffix,singleFileOnly;
 
 var runStartTime=0;
 var runTimeTips=function(){
@@ -98,10 +136,24 @@ window.runClick=function(){
 	
 	childFolderDisable=$(".childFolderDisable")[0].checked;
 	pathUseName=$(".pathUseName")[0].checked;
+	splitToSingle=$(".splitToSingle")[0].checked;
+	singleFileSuffix=splitToSingle?$(".singleFileSuffix").val():"";
+	singleFileOnly=splitToSingle?$(".singleFileOnly")[0].checked:false;
 	if(childFolderDisable && pathUseName){
 		Runtime.Log("使用名称 和 不创建目录 选项不允许同时选择，否则可能导致同名冲突",1);
 		return;
 	}
+	if(splitToSingle && !singleFileSuffix && !singleFileOnly){
+		Runtime.Log("文件名后缀为空时，必须勾选 不要生成包含所有下一级数据的文件，否则会文件名冲突",1);
+		return;
+	}
+	Runtime.Log("拆分配置："+JSON.stringify({
+		pathUseName:pathUseName
+		,childFolderDisable:childFolderDisable
+		,splitToSingle:splitToSingle
+		,singleFileSuffix:singleFileSuffix
+		,singleFileOnly:singleFileOnly
+	}));
 	
 	//读取用户选择的文件路径
 	var config=JSON.parse(AppCmds.config());
@@ -258,15 +310,21 @@ var analysisFile=function(path,Catch,OK){
 			}catch(e){
 				throw new Error("第"+lineNo+"行数据不能解析成json");
 			}
-			if(item.properties.pid==null || item.properties.ext_path==null){
+			var prop=item.properties;
+			if(prop.pid==null || prop.ext_path==null){
 				throw new Error("第"+lineNo+"行数据中无pid或ext_path属性，不支持拆分此文件");
 			}
-			var pid=item.properties.pid+"";
-			var extPath=item.properties.ext_path.split(" ");
-			var deep=extPath.length-1-1;
-			extPath.pop();
+			var pid=prop.pid+"";
+			var extPath=prop.ext_path.split(" ");//上级完整路径 下面会pop
+			var deep=extPath.length-1-1;//上级的深度 -1:0级 0:省 1:市 2:区
+			var name=extPath.pop();
 			var obj=pids[pid]||{childCount:0,lines:[],deep:deep,names:extPath};
 			pids[pid]=obj;
+			
+			var id=prop.id||prop.unique_id;
+			if(splitToSingle && id==null){
+				throw new Error("第"+lineNo+"行数据中无 id|unique_id 属性，不支持最小化拆分");
+			};
 			
 			//固定的id格式，省去查找上级id麻烦，直接截取
 			if(deep==-1 && pid.length==1){
@@ -288,7 +346,7 @@ var analysisFile=function(path,Catch,OK){
 			}
 			if(obj.deep!=deep)throw new Error("第"+lineNo+"行数据的层级解析错误");
 			
-			obj.lines.push(line);//写入内存，如果是超大文件，内存不够的话处理不了，另外：超大文件循环fileReadLine一遍非常耗时，没有缓存的话，性能非常低
+			obj.lines.push({id:id+"", name:name, txt:line});//写入内存，如果是超大文件，内存不够的话处理不了，另外：超大文件循环fileReadLine一遍非常耗时，没有缓存的话，性能非常低
 			obj.childCount++;
 			count++;
 		};
@@ -303,12 +361,16 @@ var analysisFile=function(path,Catch,OK){
 			return;
 		}
 		
+		var fileCount=0;
+		if(!singleFileOnly) fileCount+=Object.keys(pids).length;
+		if(splitToSingle) fileCount+=count;
+		
 		//分析完成
 		finalCall();
 		updateStatus(true);
 		OK({
 			pids:pids
-			,fileCount:Object.keys(pids).length
+			,fileCount:fileCount
 			,count:count
 			,header:header
 		});
@@ -323,9 +385,10 @@ var saveSpiltFile=function(meta,savePath,Catch,OK){
 	
 	//优化路径，如果都是一个城市下的数据，就忽略掉上级路径
 	var all0=true,all1=true;
-	var p0="",p1="";
+	var p0="",p1="",hasDeep={};
 	for(var pid in meta.pids){
 		var pidObj=meta.pids[pid];
+		hasDeep[pidObj.deep]=1;
 		if(pidObj.ids[0] && (!p0 || p0==pidObj.ids[0])){
 			p0=pidObj.ids[0];
 		}else{
@@ -342,6 +405,8 @@ var saveSpiltFile=function(meta,savePath,Catch,OK){
 			}
 		}
 	}
+	if(hasDeep[0] && hasDeep[1]) all0=false;
+	if(hasDeep[1] && hasDeep[2]) all1=false;
 	if(meta.pids["0"]){
 		all0=false;
 		all1=false;
@@ -397,24 +462,30 @@ var saveSpiltFile=function(meta,savePath,Catch,OK){
 			}
 			break;
 		}
-		if(folder){
-			folders[folder]=1;
-		}
+		//每条数据需单独拆分成一个文件，先生成文件夹
+		var singleFolder=folder;
+		
 		var newFile=folder;
 		if(pathUseName){
 			if(pid=="0"){
 				newFile+="/全国.json";
+				!childFolderDisable&&(singleFolder+="/全国");
 			}else{
 				newFile+="/"+pidObj.names[pidObj.deep]+".json";
+				!childFolderDisable&&(singleFolder+="/"+pidObj.names[pidObj.deep]);
 			}
 		}else{
 			newFile+="/"+pid+".json";
+			!childFolderDisable&&(singleFolder+="/"+pid);
 		}
 		
 		var tips=runTimeTips()+" 进度："+(idx+1)+"/"+pidList.length+" 正在写入 ";
-		Runtime.Log(tips+newFile);
-		AppCmds.showTips(tips+savePath+newFile);
-		fileCount++;
+		var tips2=singleFileOnly?(folder+"/"):newFile;
+		if(splitToSingle){
+			tips2+=(singleFileOnly?" 共":"，和")+pidObj.lines.length+"个单独文件";
+		}
+		Runtime.Log(tips+tips2);
+		AppCmds.showTips(tips+savePath+tips2);
 		
 		
 		/***将数据内容写入新文件***/
@@ -448,31 +519,56 @@ var saveSpiltFile=function(meta,savePath,Catch,OK){
 					//没有数据了
 					break;
 				};
-				var line=pidObj.lines[lineIdx];
+				var lineObj=pidObj.lines[lineIdx];
+				var line=lineObj.txt;
 				
 				
 				//直接写入这行数据
-				AppCmds.fileWrite(write,(writeCount>0?",":"")+"\n"+line);
+				write&&AppCmds.fileWrite(write,(writeCount>0?",":"")+"\n"+line);
 				writeCount++;
 				count++;
+				
+				//将这行数据写入单独一个文件
+				var writeS="";
+				if(splitToSingle){try{
+					fileCount++;
+					singleFolder && (folders[singleFolder]=1);
+					var newFileS=singleFolder;
+					if(pathUseName){
+						newFileS+="/"+lineObj.name+singleFileSuffix+".json";
+					}else{
+						newFileS+="/"+lineObj.id+singleFileSuffix+".json";
+					};
+					writeS=AppCmds.openFileWriteRes("AutoDir:"+savePath+newFileS);
+					AppCmds.fileWrite(writeS, meta.header.join("\n"));
+					AppCmds.fileWrite(writeS, "\n"+line);
+					AppCmds.fileWrite(writeS,"\n]\n}\n");
+				}finally{
+					AppCmds.closeRes(writeS);
+				}};
 			};
 			
-			AppCmds.fileWrite(write,"\n]\n}\n");
+			write&&AppCmds.fileWrite(write,"\n]\n}\n");
 			
 			//这个pid处理完成，开始下一个
 			finalCall();
 			setTimeout(nextPid);
 		};
 		
-		try{
-			//打开文件，写入开头的部分
-			var write=AppCmds.openFileWriteRes("AutoDir:"+savePath+newFile);
-			var writeCount=0;
-			AppCmds.fileWrite(write, meta.header.join("\n"));
-		}catch(e){
-			finalCall();
-			throw e;
-		}
+		var write="";
+		if(!singleFileOnly){
+			fileCount++;
+			if(folder) folders[folder]=1;
+			try{
+				//打开文件，写入开头的部分
+				write=AppCmds.openFileWriteRes("AutoDir:"+savePath+newFile);
+				var writeCount=0;
+				AppCmds.fileWrite(write, meta.header.join("\n"));
+			}catch(e){
+				finalCall();
+				throw e;
+			}
+		};
 		writeNextLine();
 	};
 	nextPid();
