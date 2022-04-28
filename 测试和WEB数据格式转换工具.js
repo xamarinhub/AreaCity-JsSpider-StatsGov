@@ -505,6 +505,7 @@ window.BuildCitySelect=buildCitySelectFn();
 *****************************/
 function Format(type){
 	var maxLevel=+el(".AreaFormatLevel").value;
+	var fullName=+el("input[name=AreaFormatFullName]:checked").value;
 	var txt=el(".AreaFormatInput").value;
 	if(!txt){
 		return Result("请在数据源内粘贴csv数据");
@@ -538,6 +539,9 @@ function Format(type){
 				,level:-1
 				,childs:[]
 			};
+			if(fullName && type!="user"){
+				itm.name=itm.ext_name;
+			}
 			list.push(itm);
 			mapping[itm.id]=itm;
 		};
@@ -717,6 +721,8 @@ a{text-decoration: none;}
 				<option value="3">(3级)省市区</option>
 				<option value="4" selected>(4级)省市区镇</option>
 			</select>
+			<label><input type="radio" name="AreaFormatFullName" value="0" checked>使用精简名称(name)</label>
+			<label><input type="radio" name="AreaFormatFullName" value="1">使用完整名称(ext_name)</label>
 			
 			<hr>
 			<div>
@@ -781,5 +787,28 @@ elem.addEventListener("click",function(e){
 		window[arr[0]](arr[1]);
 	};
 });
+
+el(".AreaFormatLevel").onchange=function(){
+	TestReView("已切换数据级别");
+};
+var arr=document.querySelectorAll("input[name=AreaFormatFullName]");
+for(var i=0;i<arr.length;i++){
+	arr[i].onclick=function(){ TestReView("已切精简/完整名称"); }
+};
+window.TestReView=function(topHtml){
+	var input=el(".AreaFormatInput");
+	FormatLog((topHtml||"")+`
+		<hr><div>输入框中本来的提示信息：</div>
+		<pre>${input.placeholder}</pre>
+		
+		<hr><div class='initTest1'></div>
+		<hr><div class='initTest2'></div>
+		<hr><div class='initTest3'></div>
+	`);
+	
+	TestClick("js",".initTest1");
+	TestClick("jsonObject",".initTest2",460204);//选中 三亚 天涯
+	TestClick("jsonArray",".initTest3",11);//选中 北京
+};
 
 })();
