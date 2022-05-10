@@ -3,7 +3,7 @@
 作者：高坚果
 时间：2021-2-9 15:17:30
 
-转换算法来自 https://www.oschina.net/code/snippet_260395_39205
+转换算法来自 https://www.oschina.net/code/snippet_260395_39205 《GPS坐标互转：WGS-84(GPS)、GCJ-02(Google地图)、BD-09(百度地图) 》已无法访问，镜像搬运： https://www.cnblogs.com/yzycoder/p/6531890.html
 
 注：CGCS2000坐标系和GPS坐标之间的误差小到可以忽略，因此GPS坐标直接当成CGCS2000坐标来使用也是可行的，参考：https://www.zhihu.com/question/35775670。
 

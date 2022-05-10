@@ -3,7 +3,7 @@
 作者：高坚果
 时间：2021-2-9 15:17:30
 
-转换算法来自 https://www.oschina.net/code/snippet_260395_39205
+转换算法来自 https://www.oschina.net/code/snippet_260395_39205 《GPS坐标互转：WGS-84(GPS)、GCJ-02(Google地图)、BD-09(百度地图) 》已无法访问，镜像搬运： https://www.cnblogs.com/yzycoder/p/6531890.html
 
 注：CGCS2000坐标系和GPS坐标之间的误差小到可以忽略，因此GPS坐标直接当成CGCS2000坐标来使用也是可行的，参考：https://www.zhihu.com/question/35775670。
 
@@ -43,6 +43,14 @@ var bd_encrypt = function (gcjLon, gcjLat) {
 	bdLon = z * Math.cos(theta) + 0.0065;  
 	bdLat = z * Math.sin(theta) + 0.006; 
 	return {'lat' : bdLat,'lon' : bdLon};
+}
+var bd_decrypt = function (bdLon, bdLat) {
+	var x = bdLon - 0.0065, y = bdLat - 0.006;  
+	var z = Math.sqrt(x * x + y * y) - 0.00002 * Math.sin(y * x_pi);  
+	var theta = Math.atan2(y, x) - 0.000003 * Math.cos(x * x_pi);  
+	var gcjLon = z * Math.cos(theta);  
+	var gcjLat = z * Math.sin(theta);
+	return {'lat' : gcjLat, 'lon' : gcjLon};
 }
 
 
