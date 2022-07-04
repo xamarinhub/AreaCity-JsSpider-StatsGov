@@ -43,6 +43,7 @@ var fixQQmapAddGovBeforeAmp={
 	/*130502:{
 		name:"襄都区",pid:1305
 	}*/
+	659011:{name:"新星市",pid:65,childCopySelf:true} //还要复制一份当子级 直辖市
 };
 //和高德数据对比前qq替换统计局数据，就是这些id对应的数据都采用统计局的数据
 var fixQQmapReplaceGovBeforeAmp={
@@ -119,13 +120,7 @@ var amapDifference={
 	,460302:{lostName:"南沙区",lostAdd:true}//新设区
 	
 	//高德的id错误，使用qq的id
-	,431121:{name:"祁阳市",useQQCode:"431181000000"}
-	,450127:{name:"横州市",useQQCode:"450181000000"}
-	,513425:{name:"会理市",useQQCode:"513402000000"}
-	,532331:{name:"禄丰市",useQQCode:"532302000000"}
-	,610322:{name:"凤翔区",useQQCode:"610305000000"}
-	,610928:{name:"旬阳市",useQQCode:"610981000000"}
-	,654223:{name:"沙湾市",useQQCode:"654203000000"}
+	//,431121:{name:"祁阳市",useQQCode:"431181000000"}
 };
 
 
@@ -172,7 +167,6 @@ var gov3Difference={
 	,610322:{lostName:'凤翔县'}
 	,610928:{lostName:'旬阳县'}
 	,654223:{lostName:'沙湾县'}
-	,659011:{lostName:'新星市'}
 
 	
 	//MCA和qq名称称相同但id不同的，但qq和高德相同，暂采用qq和高德的便于数据处理
@@ -541,7 +535,14 @@ var formatQQ=function(arr,level){
 				console.log(itm.code+":"+itm.name+"已添加子级",govItm,itm);
 				addSet.fix=true;
 				govItm.isAdd=true;
-				itm.child.push(govItm);
+				if(addSet.childCopySelf){
+					itm.child.push(Object.assign({}
+						,govItm
+						,{child:[govItm]}
+					));
+				}else{
+					itm.child.push(govItm);
+				}
 			};
 		};
 	};
