@@ -96,6 +96,10 @@ for(var i=0;i<pinyinList.length;i++){
 		console.error("存在重复ID",o);
 		throw new Error();
 	};
+	if(!/^[2469]$/.test((o.id+"").length)){
+		console.error("ID非预期",o);
+		throw new Error();
+	}
 	idMP[o.id]=o;
 };
 

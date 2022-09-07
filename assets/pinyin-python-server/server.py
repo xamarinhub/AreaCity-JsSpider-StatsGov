@@ -102,8 +102,14 @@ class HttpHandler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header('Content-type', 'text/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', '*')
+        self.send_header('Access-Control-Allow-Headers', '*')
+        self.send_header('Access-Control-Max-Age', '86400')
         self.end_headers()
         self.wfile.write(rtv.encode())
+    
+    def do_OPTIONS(self):
+        self._response("/", {})
     
     def do_GET(self):
         path,args=urllib.parse.splitquery(self.path)
