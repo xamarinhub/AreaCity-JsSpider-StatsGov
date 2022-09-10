@@ -6,7 +6,7 @@ GitHub: https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov
 在任意网页控制台执行本代码。另外：index.html已经包含了此代码，双击就能运行，使用http访问更佳。
 */
 "use strict";
-var AllowAccessFolder="2019/采集到的数据";
+var AllowAccessFolder="src/采集到的数据";
 var AllowAccessFiles=["ok_data_level3.csv(3级省市区)","ok_data_level4.csv(4级省市区镇)"];
 
 
@@ -14,9 +14,73 @@ var AllowAccessFiles=["ok_data_level3.csv(3级省市区)","ok_data_level4.csv(4�
 ** 具体格式化实现函数
 *****************************/
 function UserFormat(list,mapping){
-	//修改此方法实现自定义格式，可参考JsonArrayFormat的实现
-	//list中的字段如果不够，请修改Format中csv数据提取，默认只提取了id、name、pid、pinyin(为前缀)
-	return Result("自定义方法未实现，请修改UserFormat方法源码");
+/***********************
+	修改此方法实现自定义格式（剪切本代码到你的编辑器中修改），可参考JsonArrayFormat的实现
+	参数list：为所有城市平铺列表，[{id,pid,deep,name,pinyin_prefix,pinyin,ext_id,ext_name,child:[]},...]
+	参数mapping：为id城市映射，0索引的是省级0:{child:[]}，其他为id：{id,pid,deep,name,pinyin_prefix,pinyin,ext_id,ext_name,child:[]}
+*************************/
+
+/**导出的json key配置**/
+var Settings={
+	ID:"id"
+	,IDMinLen:2 //id最少要这么长，取值2，4，6，尽量不要超过2，因为部分城市没有下级，数据中添加了00结尾的ID作为下级，因此恢复6位时就会冲突。如过调整，生成的数据需要自行处理冲突ID
+	
+	//如果设为空，会将所有城市展开到数组内，不进行上下级嵌套
+	,Childs:"childs"
+	
+	//以下字段如果设为空，对应字段就不添加到结果中
+	,pid:"pid"
+	,deep:"deep"
+	,name:"name"
+	,pinyin:"pinyin"
+	,pinyin_prefix:"pinyin_prefix"
+	,ext_id:"ext_id"
+	,ext_name:"ext_name"
+};
+
+var exec=function(obj,dist){//写个函数，递归处理数据
+	if(!obj.childs.length){
+		return;
+	};
+	for(var i=0;i<obj.childs.length;i++){
+		var itm=obj.childs[i];
+		var o={};
+		dist.push(o);
+		
+		var id=(itm.id+"");
+		o[Settings.ID]=id.length<Settings.IDMinLen?(id+"000000000000").substr(0,Settings.IDMinLen):id;
+		
+		var add=function(key){
+			var setKey=Settings[key];
+			if(setKey){
+				o[setKey]=itm[key];
+			};
+		};
+		add("pid");
+		add("deep");
+		add("name");
+		add("pinyin");
+		add("pinyin_prefix");
+		add("ext_id");
+		add("ext_name");
+		
+		if(Settings.Childs){
+			var c=exec(itm,[]);
+			if(c){
+				o[Settings.Childs]=c;
+			};
+		}else{
+			exec(itm,dist);
+		};
+	};
+	return dist;
+};
+	var data=exec(mapping[0],[]);
+
+	var code=JSON.stringify(data,null,"\t");
+	var codeLen=new Blob([code],{"type":"text/plain"}).size+3;
+
+	return Result("",code,"area_format_user.json",codeLen+"字节");
 };
 
 
@@ -29,7 +93,7 @@ function JsonArrayFormat(list,mapping){
 			n:itm.name
 			,i:itm.id
 			,p:itm.pid
-			,y:itm.pinyin
+			,y:itm.pinyin_prefix
 		});
 	}
 	var code=JSON.stringify(data);
@@ -47,7 +111,7 @@ function JsonObjectFormat(list,mapping){
 			var itm=obj.childs[i];
 			p[itm.id]={
 				n:itm.name
-				,y:itm.pinyin
+				,y:itm.pinyin_prefix
 			};
 			var c=x(itm);
 			if(c){
@@ -79,7 +143,7 @@ function JsFormat(list,mapping){
 			data.push(",");
 			data.push(itm.name);
 			data.push(",");
-			data.push(itm.pinyin);
+			data.push(itm.pinyin_prefix);
 			x(itm);
 		};
 		data.push("]")
@@ -162,7 +226,12 @@ window.FormatClick=function(type){
 		return;
 	};
 	
-	var info=res.findMaxLevel+"级"+(res.findMaxLevel<res.maxLevel?"(数据源没有"+res.maxLevel+"级)":"")+"转换完成，共"+res.list.length+"条数据，"+res.i+" <span class='FormatDownA'></span>";
+	var info=res.findMaxLevel+"级"+(res.findMaxLevel<res.maxLevel?"(数据源没有"+res.maxLevel+"级)":"")+"转换完成，共"+res.list.length+"条数据，"+res.i+" <span class='FormatDownA'></span>"
+		+'<div style="padding-top:10px">'
+		+'<textarea style="width:570px;height:160px">'
+		+'//文件内容预览'+(res.v.length>1024*1024?"（内容过大已截断）":"（内容已全部显示）")+'：\n'
+		+res.v.substr(0,1024*1024).replace(/\t/g,"    ")
+		+'</textarea></div>';
 	log(info);
 	
 	var url=URL.createObjectURL(
@@ -403,7 +472,7 @@ var buildCitySelectFn=function(){
 			if(y){
 				return y;
 			}else{
-				return a.name.localeCompare(b.name);
+				return (a.y+a.name).localeCompare(b.y+b.name);
 			};
 		});
 		for(var i=0,o,name;i<arr.length;i++){
@@ -436,6 +505,7 @@ window.BuildCitySelect=buildCitySelectFn();
 *****************************/
 function Format(type){
 	var maxLevel=+el(".AreaFormatLevel").value;
+	var fullName=+el("input[name=AreaFormatFullName]:checked").value;
 	var txt=el(".AreaFormatInput").value;
 	if(!txt){
 		return Result("请在数据源内粘贴csv数据");
@@ -459,11 +529,19 @@ function Format(type){
 			var itm={
 				id:+arr[0]
 				,pid:+arr[1]
-				,level:-1
+				,deep:+arr[2]
 				,name:arr[3].replace(/""/g,'"').replace(/^"|"$/g,'')
-				,pinyin:arr[4].replace(/""/g,"").replace(/^"|"$/g,'')
+				,pinyin_prefix:arr[4].replace(/""/g,"").replace(/^"|"$/g,'')
+				,pinyin:arr[5].replace(/""/g,"").replace(/^"|"$/g,'')
+				,ext_id:arr[6].replace(/""/g,"").replace(/^"|"$/g,'')
+				,ext_name:arr[7].replace(/""/g,"").replace(/^"|"$/g,'')
+				
+				,level:-1
 				,childs:[]
 			};
+			if(fullName && type!="user"){
+				itm.name=itm.ext_name;
+			}
 			list.push(itm);
 			mapping[itm.id]=itm;
 		};
@@ -482,8 +560,15 @@ function Format(type){
 	//计算level值
 	var xLevel=function(obj){
 		for(var i=0;i<obj.childs.length;i++){
-			obj.childs[i].level=obj.level+1;
-			xLevel(obj.childs[i]);
+			var o=obj.childs[i];
+			o.level=obj.level+1;
+			if(o.level!=o.deep+1){
+				var msg="数据存在错误，级别不对，请看控制台输出";
+				alert(msg);
+				console.error(msg,obj,o);
+				throw new Error();
+			};
+			xLevel(o);
 		};
 	};
 	xChild();
@@ -509,7 +594,17 @@ function Format(type){
 	//实际格式化
 	var rtv;
 	if(type=="user"){
-		rtv=UserFormat(list,mapping);
+		window.UserFormat=null;
+		try{
+			eval.call(window,el(".AreaFormatUserFormatIn").value);
+			if(!UserFormat){
+				throw new Error("需在代码内实现UserFormat方法");
+			}
+			rtv=UserFormat(list,mapping);
+		}catch(e){
+			console.error(e);
+			return Result("自定义UserFormat代码执行异常："+e.message);
+		}
 	}else if(type=="js"){
 		rtv=JsFormat(list,mapping);
 	}else if(type=="jsonObject"){
@@ -524,6 +619,10 @@ function Format(type){
 	rtv.findMaxLevel=findMaxLevel;
 	rtv.list=list;
 	rtv.mapping=mapping;
+	
+	window.FormatResult=rtv;
+	console.log("结果已存入变量 FormatResult ：", FormatResult);
+	console.log("可以 eval('('+FormatResult.v+')')");
 	return rtv;
 };
 
@@ -554,6 +653,7 @@ function log(html,err){
 	el(".AreaFormatResult").innerHTML=`<div style="${err?'color:red':''}">`+html+'</div>';
 };
 window.FormatLog=log;
+var isIndex=window.PageIsRootIndex;
 
 var bodyHtml=`
 <style>
@@ -575,10 +675,11 @@ body{
 	margin:8px 0;
 }
 a{text-decoration: none;}
-.GitHub a{color:#fff}
+.AreaFormatA a{color:#fb0}
+.AreaFormatA a:hover{color:#f00}
 
 .AreaFormat_Title{
-	line-height: 80px;
+	padding: 40px 0 10px;
 	font-size: 40px;
 	text-align: center;
 }
@@ -590,12 +691,13 @@ a{text-decoration: none;}
 	font-size:18px;
 }
 </style>
-<div class="AreaFormat">
-	<div class="GitHub" style="position: absolute;left:30px; top:20px;">
-		<a href="https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov">返回 GitHub</a>
-	</div>
+<div class="AreaFormat ${isIndex?'mainBox" style="padding:0':''}">
 	<div class="AreaFormat_Title">
-		测试和WEB数据格式转换工具
+		四级行政区划数据预览 + Web数据格式在线转换工具
+	</div>
+	<div class="AreaFormatA" style="width:1030px;margin:0 auto;padding-bottom:30px">
+		小提示 : 
+		本工具是用来转换省市区镇四级行政区划数据为js支持的格式的，不支持导入数据库，也不支持处理坐标和城市边界范围书记，如果你要导入数据库、或转换坐标和城市边界范围数据（如shp、geojson、sql），<a href="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/AreaCity-Geo-Transform-Tools.html" target="_blank">请点此处</a>下载《AreaCity-Geo格式转换工具软件》轻松处理。
 	</div>
 	<div style="display: flex;">
 		<div style="flex: 1;"></div>
@@ -619,6 +721,8 @@ a{text-decoration: none;}
 				<option value="3">(3级)省市区</option>
 				<option value="4" selected>(4级)省市区镇</option>
 			</select>
+			<label><input type="radio" name="AreaFormatFullName" value="0" checked>使用精简名称(name)</label>
+			<label><input type="radio" name="AreaFormatFullName" value="1">使用完整名称(ext_name)</label>
 			
 			<hr>
 			<div>
@@ -648,10 +752,13 @@ a{text-decoration: none;}
 			</div>
 			
 			<hr/>
-			<input class="AreaFormat_Btn" type="button" value="导出为自定义" exec="FormatClick,user">
 			<div>
-				自行修改源码实现UserFormat方法，导出自己想要的格式
+				<textarea class="AreaFormatUserFormatIn" style="width:390px;height:160px"
+				placeholder="">${UserFormat.toString().replace(/\t/g,'    ')}</textarea>
 			</div>
+			<input class="AreaFormat_Btn" type="button" value="导出为自定义" exec="FormatClick,user">
+			<div>自行修改源码实现UserFormat方法，导出自己想要的格式</div>
+			<div>代码框内默认已实现的导出格式为：[{id:123,name:"省名",所有字段...,childs:[ 所有子级... ]}]</div>
 		</div>
 		<div style="flex: 1;"></div>
 	</div>
@@ -669,7 +776,7 @@ while(true){
 };
 var elem=document.createElement("div");
 elem.innerHTML=bodyHtml;
-document.body.appendChild(elem);
+(window.AreaFormatBoxElem||document.body).appendChild(elem);
 document.body.scrollTop=0;
 document.documentElement.scrollTop=0;
 
@@ -680,5 +787,28 @@ elem.addEventListener("click",function(e){
 		window[arr[0]](arr[1]);
 	};
 });
+
+el(".AreaFormatLevel").onchange=function(){
+	TestReView("已切换数据级别");
+};
+var arr=document.querySelectorAll("input[name=AreaFormatFullName]");
+for(var i=0;i<arr.length;i++){
+	arr[i].onclick=function(){ TestReView("已切精简/完整名称"); }
+};
+window.TestReView=function(topHtml){
+	var input=el(".AreaFormatInput");
+	FormatLog((topHtml||"")+`
+		<hr><div>输入框中本来的提示信息：</div>
+		<pre>${input.placeholder}</pre>
+		
+		<hr><div class='initTest1'></div>
+		<hr><div class='initTest2'></div>
+		<hr><div class='initTest3'></div>
+	`);
+	
+	TestClick("js",".initTest1");
+	TestClick("jsonObject",".initTest2",460204);//选中 三亚 天涯
+	TestClick("jsonArray",".initTest3",11);//选中 北京
+};
 
 })();

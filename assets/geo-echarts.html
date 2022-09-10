@@ -1,0 +1,584 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+<link rel="shortcut icon" type="image/png" href="https://xiangyuecn.gitee.io/areacity-jsspider-statsgov/assets/icon.png">
+
+<title>ECharts Map四级下钻在线测试和预览+代码生成</title>
+
+<script>
+/*
+左右两幅地图显示创意来自：
+	https://github.com/TangSY/echarts-map-demo
+纯色的配色来自：
+	https://www.jianshu.com/p/028525cbd080
+*/
+</script>
+
+<script src="geo-echarts.js"></script>
+<script src="csv-ver-date.js"></script>
+<script src="https://jiebian.life/static/bjc/web/jiebian/www/lib_pc.js"></script>
+</head>
+
+<body>
+<div class="lowB" style="font-size: 50px;text-align: center;color: #f60;">本工具未支持low b浏览器，换个吧&#x1f644;</div><script>document.querySelector(".lowB").innerHTML=``;</script>
+
+<style class="defaultViewCss">
+body{
+	word-wrap: break-word;
+	background:#f5f5f5 center top no-repeat;
+	background-size: auto 680px;
+	
+	font-size:16px;
+}
+
+.main{
+	margin:0 auto;
+	padding:0 50px 20px;
+}
+</style>
+<style>
+pre{
+	white-space:pre-wrap;
+}
+a{
+	text-decoration: none;
+	color:#06c;
+}
+a:hover{
+	color:#f00;
+}
+p{
+	text-indent: 32px;
+}
+img{
+	max-width:90%;
+}
+
+.Center{
+	text-align: center;
+}
+
+
+.mainBox{
+	margin-top:12px;
+	padding: 12px;
+	border-radius: 6px;
+	background: #fff;
+	--border: 1px solid #f60;
+	box-shadow: 2px 2px 3px #aaa;
+}
+.mainTitle{
+	font-size: 24px;
+	font-weight: bold;
+}
+
+.lb{
+	display:inline-block;
+	vertical-align: middle;
+	background:#00940e;
+	color:#fff;
+	font-size:14px;
+	padding:2px 8px;
+	border-radius: 99px;
+}
+
+.pd{
+	padding:0 0 6px 0;
+}
+.del{
+	text-decoration: line-through;
+}
+.b{
+	font-weight: bold;
+	font-style: normal;
+}
+.i{
+	padding: 2px 4px;
+	background-color: #f6f6f6;
+	vertical-align: middle;
+	color: #c7254e;
+	font-size: 12px;
+	white-space: pre-wrap;
+	border-radius: 3px;
+	font-style: normal;
+}
+</style>
+<script>
+var IsWidget=GetArgs("widget");
+if(IsWidget){
+	$(".defaultViewCss").remove();
+	$("body").append(`
+<style>
+body{
+	margin:0
+}
+body::-webkit-scrollbar{
+	width: 6px;
+}
+body::-webkit-scrollbar-thumb{
+	border-radius: 5px;
+	background-color: rgba(144, 146, 152, 0.3);
+}
+</style>`);
+}else if(GeoECharts.IsMobile){
+	$("body").append(`
+<style>
+.main{
+	padding:0 5px 80px;
+}
+</style>`);
+}
+</script>
+
+
+
+
+<div class="main">
+	<div class="mainBox" style2="display:none">
+		<span style="font-size:32px;color:#0B0;">ECharts Map四级下钻在线测试和预览+代码生成</span>
+		<a href="..">首页</a> |
+		<a href="https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov">GitHub >></a> |
+		<a href="https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov">Gitee >></a>
+	</div>
+	<div style="display:none" style2="text-align: center;">
+		<span style="font-size:18px;color:#fff;">坐标边界范围在线测试预览</span>
+		<a href="geo-echarts.html" target="_blank">[全屏]</a>
+	</div>
+	
+	<div class="mainBox" class2="" style="padding-bottom:0;" style2="color:#fff">
+		<div class="FlexBox" class3="">
+			<div class="FlexItem" class2="Hide2">
+				<div class="mapView"></div>
+			</div>
+			<div class="FlexItem">
+				<div class="echartsView" style="border:1px solid #ddd;box-sizing: border-box;" style2=""></div>
+			</div>
+		</div>
+		
+		<div class="FlexBox" class3="" style="padding:5px 0" style2="">
+			<div class="FlexItem mapPointView" class2="Hide2" style="min-width:450px" style3=""></div>
+			<div class="statusView">初始化中...</div>
+		</div>
+	</div>
+	
+	<div class="mainBox" class2="" style2="color:#fff">
+		<div class="FlexBox" class2="" class3="">
+		<div class="FlexItem" class2="Hide">
+			<div class="mainTitle">配置项</div>
+		</div>
+		<div style="text-align:right" style2="">
+			<span class="ILB pd" style="margin-right:10px">
+				<span class="lb">边界采样数 :</span>
+				最多<input class="polygonPointsMax" style="text-align:center;width:60px">个坐标点
+			</span>
+			
+			<span class="ILB pd" style="margin-right:10px">
+				<span class="lb">配置参数 :</span>
+				<label><input type="checkbox" class="polygon4603View">显示三沙市</label>
+			</span>
+			
+			<span class="ILB pd">
+				<span class="Btn" onclick="updateSet()">确定</span>
+			</span>
+		</div>
+		</div>
+		
+		<div style="padding-top:10px;">
+			默认的后端api接口返回的边界数据已经过：重采样Simplify简化处理 + GeoZip压缩，大幅节省流量，算法源码在本页面下面；简化后最高的从5万个坐标点变成1200个坐标点
+			，两个边界之间放大后会明显感受到不够精细
+			，<span style="color:red">因后端api接口使用的Simplify算法太简单，未考虑相邻区域的拓扑结构，放大后会出现间隙或重叠，甚至边角缺失的现象</span>
+			；<span style="color:#0b0">自己使用时可以调高采样数、或使用专业的Simplify算法、或直接返回原始数据，就没有这个问题了</span>。
+		</div>
+		
+		<div class2="Hide2" style="padding-top:20px;">
+			<div>
+				<span class="mainTitle">自定义数据源 - 文本文件</span>
+				<span style="color:#999;font-size:14px;margin-left:10px">json、wkt，支持图形：Point、Polygon、MultiPolygon</span>
+			</div>
+			
+			<div class="dropChoiceBox" style="padding-top:5px"></div>
+		</div>
+		
+		<div class2="Hide2" style="padding-top:20px;">
+			<div>
+				<span class="mainTitle">自定义数据源 - AreaCity-Query-Geometry</span>
+				<span style="color:#999;font-size:14px;margin-left:10px">坐标数据、边界数据查询工具，1秒可查1万个以上坐标对应的城市信息</span>
+			</div>
+			
+			<div class="aqgToolsBox" style="padding-top:5px"></div>
+		</div>
+	</div>
+	
+	<div class="mainBox" class2="Hide">
+		<div class="mainTitle">功能定制开发</div>
+		
+		<div style="padding-top:10px;font-size:22px;font-weight:bold;color:#0ab;">
+			如需数据、功能定制，网站、App、小程序、前端后端开发等需求；
+			矢量专题地图绘制、修改，前端地图、大屏、ECharts数据展示开发，后端数据处理、接口开发；
+			请加QQ群：<span class="qqGroupList"></span>，联系群主（即作者），谢谢~
+			<script>QQGroupList.HTML_i(".qqGroupList")</script>
+		</div>
+	</div>
+	
+	<div class="mainBox">
+		<div class="mainTitle" class2="Hide">数据下载</div>
+		
+		<div class="pd">
+			<span style="font-weight:bold;color:#0b0;">诸位大佬高抬贵手，</span>
+			<span style="font-weight:bold;color:#fa0;font-size:30px">请勿采集本页面接口数据</span>（服务器小水管不经揍），所有数据均已提供完整版下载，并且下载的csv文件可使用《<a href="AreaCity-Geo-Transform-Tools.html" target="_blank">AreaCity-Geo格式转换工具软件</a>》转成 shp、geojson、sql、坐标系转换、导入数据库 等强大支持，请直接下载数据不要采集：
+		</div>
+		
+		<div class="pd">
+			省市区三级的数据是开源的，<span style="font-weight:bold;color:#0b0;">
+			<a href="download.html" target="_blank">可以到 GitHub 下载</a>
+			ok_geo.csv 数据文件，里面包含了全部坐标边界数据</span>。
+		</div>
+		
+		<div class="pd" style="font-size:18px;padding-top:20px">
+			<span style="color:red;">
+			乡镇这级的数据是付费数据，此页面接口返回的数据仅有最后一个乡镇是最高80个采样数的粗略边界，其他的乡镇均为边界外接矩形（4个坐标点），</span>
+			<br><span style="font-weight:bold;color:#fa0;font-size:30px">采之无用！谢谢！！</span>
+			完整乡镇数据文件下载：
+		</div>
+		
+		<div style="font-size:22px;font-weight:bold;color:#0b0;">
+			乡镇第4级坐标+边界范围数据
+			<a href="geo-level4.html" target="_blank">可以到此下载 和 查看报价</a>
+			，压缩包内 ok_geo4_*.csv 文件含了全部的乡镇数据，为付费数据，下载的压缩包里面提供了部分免费数据供测试，欢迎下载体验。
+		</div>
+		
+		<div class="mainTitle" style="padding-top:60px">数据版本</div>
+		<div class="geoVerDateView" style="padding-top:5px"></div>
+		<script>$(".geoVerDateView").html(CsvPubDate.TableHTML({level4:true,geo:true,geo4:true}));</script>
+	</div>
+	
+	<div class="mainBox" style="max-height:90vh;overflow-y:auto">
+		<div class="FlexBox" class2="" class3="">
+			<div class="FlexItem">
+				<div style="font-size:26px;font-weight:bold;padding-bottom:10px">
+					ECharts Map四级下钻核心源码（前端）
+				</div>
+				<div style="border:1px solid #ddd">
+					<textarea class="codeEditJs" style="width:98%;height:300px"></textarea>
+				</div>
+			</div>
+			
+			<div style="width:40px" style2=""></div>
+			<div style="width:460px" style2="">
+				<div style="font-size:26px;font-weight:bold;padding-bottom:10px">
+					Geo WKT数据拉取接口（后端 C#）
+				</div>
+				<div style="border:1px solid #ddd">
+					<textarea class="codeEditCs" style="width:98%;height:300px"></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>
+
+
+<script>
+var Review=function(){
+	var s,c;
+	if(IsWidget){
+		s="style2";
+		c="class2";
+	}else if(GeoECharts.IsMobile){
+		s="style3";
+		c="class3";
+	};
+	if(s){
+		var ls=$("["+s+"]");
+		for(var i=0;i<ls.length;i++){
+			var el=$(ls[i]);
+			el.attr("style", el.attr(s));
+		}
+		var ls=$("["+c+"]");
+		for(var i=0;i<ls.length;i++){
+			var el=$(ls[i]);
+			el.attr("class", el.attr(c));
+		}
+	}
+};
+Review();
+
+var Toast=function(msg,color){
+	PageModule.toast(msg);
+	$(".PageToast").css("background",color==1?"red":color==2?"#0b1":"#888")
+	.css("boxShadow","2px 2px 10px "+(color==1?"red":color==2?"#0b1":"#888"))
+};
+</script>
+
+
+
+<script src="https://webapi.amap.com/maps?v=1.4.15"></script>
+<script>
+var geoEChartsLib=GeoECharts.GeoEChartsLib();
+
+$(".mapView,.echartsView").css({height:IsWidget?200:$(window).height()-130+"px"});
+var map=0;
+if(!IsWidget){
+	map=new AMap.Map($(".mapView")[0]);
+
+	AMap.plugin([ 'AMap.ToolBar', 'AMap.Scale', 'AMap.MapType' ], function(){
+		map.addControl(new AMap.ToolBar());
+		map.addControl(new AMap.Scale());
+		map.addControl(new AMap.MapType({defaultType:0, showRoad:true}));
+	});
+};
+
+
+var levels=[];
+var geoECharts=geoEChartsLib.Create({
+	elem:".echartsView"
+	,api:localStorage["Page_GeoECharts_api"]||"https://jiebian.life/api/extend/h5/github/areacity_geo"
+	,reqPost:function(url,args,True,False){
+		LoadData(url,args,function(data){
+			True(data.list?data:data.v);
+		},False,false);
+	}
+	,showLog:function(msg,color){
+		Toast(msg,color);
+	}
+	,onLoadBefore:function(args,cacheData,loadProcess){
+		PageModule.maskLoad();
+		
+		//0级数据，默认使用js缓存文件，不走接口，大幅减少api服务器流量
+		if(args.id==0){
+			loadProcess(function(next){
+				if(cacheData){//有缓存数据直接用缓存
+					next(cacheData);
+					return;
+				};
+				PageModule.maskLoad("省级数据加载中，请稍后...");
+				LoadJs("geo-echarts-data-cache-0.js",function(){
+					console.log("Geo DataCache0: "+FormatDate(DataCache0.T));
+					next(DataCache0.v);
+				},function(){
+					next();
+				});
+			});
+			return;
+		};
+		
+		//非0的发一个流量统计
+		var img=new Image();
+		img.src="https://ia.51.la/go1?id=20807127&pvFlag=1&cu="+encodeURIComponent(/(.+?:\/\/.+?\/)/.exec(location.href)[1]+"click-geo-echarts-"+args.id);
+	}
+	,onLoadEnd:function(err,apiData,mapDatas,geojson,dataProcess){
+		PageModule.closeMask();
+		if(err){
+			Toast(err,1);
+			return;
+		};
+		var isChoiceFile=apiData==null;
+		var cur=geoECharts.current;
+		
+		//0级时，控制一下缩放
+		geoECharts.set.zoom=1;
+		if(cur.id==0 && IsWidget){
+			geoECharts.set.zoom=1.4;
+		};
+		//0级时，如果隐藏了三沙市，就显示南海诸岛
+		if(cur.id==0 && geoEChartsLib.Polygon4603Hide && !isChoiceFile){
+			var feature=geoEChartsLib.NanhaiFeature(),prop=feature.properties;
+			geojson.features.push(feature);
+			mapDatas.push({id:prop.id,name:prop.name,isTemp:true});
+		};
+		
+		//显示配置编辑
+		geoECharts.set.showConfigEdit=!IsWidget;
+		
+		//echarts内容控制
+		if(geoEChartsLib.IsEmptyGeoJSON(geojson) && !isChoiceFile){
+			Toast("无任何子级边界",1);
+		};
+		var zipSize=0,rawSize=0;
+		for(var i=0;i<mapDatas.length;i++){
+			var o=mapDatas[i]; if(o.isTemp || IsWidget)continue;
+			var isZip=o.polygon.indexOf("Z:")+1;
+			//提示信息替换
+			o.tips+="<br>【自定义】:";
+			for(var j=0;j<geojson.features.length;j++){
+				var f=geojson.features[j],fp=f.properties,fg=f.geometry;
+				if(fp.id==o.id){
+					var fi=geoEChartsLib.FeaturePolygonInfo(f);
+					if(cur.level==3 || fp.last_time){
+						o.tips+="<br>更新时间: "+(fp.last_time||"-");
+					};
+					o.tips+="<br>类型: "+fg.type;
+					o.tips+="<br>环数: "+fi.polygon;
+					o.tips+="<br>坐标数: "+fi.point;
+					o.tips+='<br>采样数: '+apiData._PolygonPointsMax;
+					
+					o.tips+='<br>'+(isZip?'GeoZip':'')+'大小: '+(o.polygon.length/1024).toFixed(2)+" KB";
+					zipSize+=o.polygon.length;
+					if(isZip){
+						o.tips+="<br>解压大小≈ "+(fi.point*21/1024).toFixed(2)+" KB";
+						rawSize+=fi.point*21;
+					}
+				}
+			}
+		};
+		if(isZip){
+			console.log("zipSize: "+(zipSize/1024).toFixed(2)+" KB");
+		}
+		console.log("rawSize≈ "+((rawSize||zipSize)/1024).toFixed(2)+" KB");
+		
+		//显示路径
+		levels.length=cur.level;
+		levels.push(cur);
+		
+		var html=[];
+		for(var i=0;i<levels.length;i++){
+			var o=levels[i];
+			html.push('<a onclick="goLevel('+i+')">'+o.name+'</a>');
+		};
+		if(isChoiceFile){
+			html.push('自定义数据源');
+		};
+		var tips="单击地图进入下一级"+(IsWidget?"":"，点击下载按钮保存png图片")+"，当前路径："+html.join(" > ");
+		
+		if(cur.level==3 && !/^(8|4420|4403)/.test(cur.id)){
+			var msg='当前为乡镇级别边界（付费数据），只有是最后一个乡镇【'+mapDatas[mapDatas.length-1].name+'】是最高80个采样数的粗略边界，其他的乡镇均为边界外接矩形（4个坐标点），仅供测试（深圳、中山、香港、澳门无此限制）';
+			Toast(msg,2);
+			
+			tips+='<div style="color:#fa0">'+msg+'，如需完整的乡镇边界数据，<a href="geo-level4.html" target="_blank">可以到此下载和购买</a>。</div>';
+		}
+		$(".statusView").html(tips);
+		
+		
+		//绘制到地图中
+		if(map){
+		
+			map.clearMap();
+			//https://developer.amap.com/demo/javascript-api/example/overlayers/geojson
+			var texts={};
+			var mapGeo = new AMap.GeoJSON({
+				geoJSON: geojson
+				,getPolygon: function(json, lnglats) {
+					if(json.properties.id==-4603){
+						return;//南海诸岛
+					}
+					var pol=new AMap.Polygon({
+						path: lnglats,
+						bubble: true,//事件冒泡
+						strokeWeight: 1,
+						strokeColor: '#0091ea',
+						fillColor: '#80d8ff',
+						fillOpacity: 0.3
+					});
+					
+					if(lnglats.length){
+						var prop=json.properties;
+						prop=prop._parentProperities||prop;
+						var obj=texts[prop.id]||{pols:[]};
+						obj.name=prop.name;
+						obj.data=prop;
+						obj.pols.push({
+							pos:pol.getBounds().getCenter()
+							,size:pol.getArea()
+							,pol:pol
+						});
+						texts[prop.id]=obj;
+					}
+					
+					return pol;
+				}
+			});
+			mapGeo.setMap(map);
+			
+			//显示名称
+			for(var k in texts){(function(){
+				var o=texts[k];
+				o.pols.sort(function(a,b){return b.size-a.size});
+				var txt=new AMap.Text({
+					map:map
+					,text:o.name
+					,position:o.pols[0].pos
+					,style:{
+						color:"#06c"
+						,border:"none"
+						,background:"none"
+						,fontSize:"14px"
+					}
+					,extData:o.data
+				});
+				txt.on("click",function(e){
+					var o=e.target.getExtData();
+					console.log("amap click",o);
+					if(o.isTemp){
+						Toast("临时数据，不支持进入下级");
+					}else{
+						geoECharts.load(o);
+					}
+				});
+				txt.on('mouseover',function(){
+					txt.setStyle({color:"#fa0"});
+					for(var i=0;i<o.pols.length&&i<10;i++){//只高亮前面最大的几个图形 其他小的忽略 提高性能
+						o.pols[i].pol.setOptions({fillColor:"#0091ea",fillOpacity: 1});
+					}
+				});
+				txt.on('mouseout',function(){
+					txt.setStyle({color:"#06c"});
+					for(var i=0;i<o.pols.length&&i<10;i++){
+						o.pols[i].pol.setOptions({fillColor:"#80d8ff", fillOpacity: 0.3});
+					}
+				});
+			})()}
+			
+			map.setFitView();
+		}
+	}
+	,onDraw:function(){
+		window.mapPointReview&&mapPointReview();
+	}
+});
+
+var goLevel=function(idx){
+	geoECharts.load(levels[idx]);
+};
+var reviewLevel=function(){
+	var level=levels[levels.length-1];
+	console.log("reviewLevel",level);
+	geoECharts.load(level);
+};
+
+var updateSet=function(){
+	geoEChartsLib.Polygon4603Hide=!$(".polygon4603View")[0].checked;
+	
+	var pmax=+$(".polygonPointsMax").val()||600;
+	$(".polygonPointsMax").val(pmax);
+	if(pmax>1200){
+		pmax=1200;
+		$(".polygonPointsMax").val(pmax);
+		
+		Toast("错误：由于测试服务器带宽太小，边界采样数限制最高1200，如需体验原版边界数据效果，请自行提供接口测试",1);
+		return;
+	}
+	geoECharts.set.polygonPointsMax=pmax;
+	
+	geoECharts.reload();
+};
+
+updateSet();
+</script>
+
+
+
+
+
+<script src="https://xiangyuecn.gitee.io/recorder/assets/ztest-codemirror.min.5.48.4.js"></script>
+<script src="geo-echarts-drop-cscode.js"></script>
+<script src="geo-echarts-aqg-tools.js"></script>
+
+
+<div style="width:0;height:0;overflow:hidden;">
+	<img src="https://ia.51.la/go1?id=20807127&pvFlag=1">
+</div>
+
+</body>
+</html>

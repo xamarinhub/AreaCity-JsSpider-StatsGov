@@ -2,24 +2,132 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>测试和WEB数据格式转换工具</title>
+<link rel="shortcut icon" type="image/png" href="assets/icon.png">
+
+<title>最新2022年省市区县乡镇行政区划数据可导入mysql sql server数据库可三级四级多级联动，坐标边界范围矢量数据支持shp geojson arcgis arcmap qgis mapinfo gis地理围栏 - AreaCity-JsSpider-StatsGov</title>
+<script>var PageIsRootIndex=true;</script>
 </head>
 
 <body>
-
-<script src="测试和WEB数据格式转换工具.js"></script>
-
-
 <style>
 body{
 	word-wrap: break-word;
+	background:#f5f5f5 center top no-repeat;
+	background-size: auto 680px;
+	
+	font-size:16px;
+}
+.main{
+	margin:0 auto;
+	padding:0 50px 80px;
 }
 pre{
 	white-space:pre-wrap;
 }
+
+.main .AreaFormat {
+	position: relative;
+	top:0;left:0;width:100%;
+	margin-top:20px;
+}
+
+
+a{
+	text-decoration: none;
+	color:#06c;
+}
+a:hover{
+	color:#f00;
+}
+p{
+	text-indent: 32px;
+}
+img{
+	max-width:90%;
+}
+
+.Center{
+	text-align: center;
+}
+
+
+.mainBox{
+	margin-top:12px;
+	padding: 12px;
+	border-radius: 6px;
+	background: #fff;
+	--border: 1px solid #f60;
+	box-shadow: 2px 2px 3px #aaa;
+}
+
+.lb{
+	display:inline-block;
+	vertical-align: middle;
+	background:#00940e;
+	color:#fff;
+	font-size:14px;
+	padding:2px 8px;
+	border-radius: 99px;
+}
+
+.pd{
+	padding:0 0 6px 0;
+}
+.del{
+	text-decoration: line-through;
+}
+.b{
+	font-weight: bold;
+	font-style: normal;
+}
+.i{
+	padding: 2px 4px;
+	background-color: #f6f6f6;
+	vertical-align: middle;
+	color: #c7254e;
+	font-size: 12px;
+	white-space: pre-wrap;
+	border-radius: 3px;
+	font-style: normal;
+}
 </style>
 
-<script src="https://xiangyuecn.github.io/BuildHTML/buildhtml.js"></script>
+
+<div class="main">
+	<div class="mainBox">
+		<span style="font-size:32px;color:#0B0;">AreaCity 省市区县乡镇行政区划数据 + 坐标边界范围矢量数据</span>
+		首页 |
+		<a href="https://github.com/xiangyuecn/AreaCity-JsSpider-StatsGov">GitHub >></a> |
+		<a href="https://gitee.com/xiangyuecn/AreaCity-JsSpider-StatsGov">Gitee >></a>
+	</div>
+
+	<div class="mainBox">
+		<div style="font-size: 24px;font-weight: bold;padding-bottom:10px">数据版本</div>
+		<div class="geoVerDateView"></div>
+		<script src="assets/csv-ver-date.js"></script>
+		<script>
+			document.querySelector(".geoVerDateView").innerHTML=CsvPubDate.TableHTML({level4:true,geo:true,geo4:true});
+			document.querySelector(".GeoPubDate_Level4_Row1").innerHTML='<div style="color:#0b0">在本页面底下可以进行三级、四级联动测试，往下拖拖看</div>';
+			document.querySelector(".GeoPubDate_Geo_Row1").innerHTML='<div style="color:#0b0">右下角可直接体验，单击地图进入下一级(可到乡镇)</div>';
+		</script>
+	</div>
+
+	
+	
+	<div class="lowB" style="font-size: 50px;text-align: center;color: #f60;">本工具未支持low b浏览器，换个吧&#x1f644;</div><script>document.querySelector(".lowB").innerHTML=``;</script>
+	<a name="tools"></a>
+	<script>var AreaFormatBoxElem=document.querySelector(".main")</script>
+	<script src="测试和WEB数据格式转换工具.js"></script>
+	<script>
+		var elem=document.querySelector(".AreaFormat");
+		elem.className="AreaFormat mainBox";
+		elem.style.padding="0";
+	</script>
+	
+	<div class="mainBox DonateLogs"></div>
+</div>
+
+<script src="https://xiangyuecn.gitee.io/buildhtml/buildhtml.js"></script>
 <script>
 function el(cls){
 	return document.querySelector(cls);
@@ -46,23 +154,7 @@ if(/^file:/.test(location.href)){
 					var input=el(".AreaFormatInput");
 					input.value=ajax.responseText;
 					
-					FormatLog(`成功加载【${path}】数据。
-					<hr>
-					<div>输入框中本来的提示信息：</div>
-					<pre>${input.placeholder}</pre>
-					
-					<hr>
-					<div class='initTest1'></div>
-					
-					<hr>
-					<div class='initTest2'></div>
-					
-					<hr>
-					<div class='initTest3'></div>`);//<script>
-					
-					TestClick("js",".initTest1");
-					TestClick("jsonObject",".initTest2",460204);//选中 三亚 天涯
-					TestClick("jsonArray",".initTest3",11);//选中 北京
+					TestReView("成功加载【"+path+"】数据");
 				}else{
 					FormatLog("【"+path+"】数据加载失败");
 				}
@@ -74,6 +166,29 @@ if(/^file:/.test(location.href)){
 };
 </script>
 
-	
+
+<div style="width:0;height:0;overflow:hidden;">
+	<img src="https://ia.51.la/go1?id=20807127&pvFlag=1">
+</div>
+
+<!-- 加载echarts map测试挂件 -->
+<script src="assets/geo-echarts.js"></script>
+<div class="GeoEChartsView"></div>
+<script>
+GeoECharts.CreateWidget({
+	mobElem:document.querySelector(".GeoEChartsView")
+});
+</script>
+
+<!-- 加载打赏挂件 -->
+<div class="DonateView"></div>
+<script src="https://xiangyuecn.gitee.io/recorder/assets/zdemo.widget.donate.js"></script>
+<script>
+DonateWidget({
+	log:function(msg){var div=document.createElement("div");div.innerHTML=msg;document.querySelector(".DonateLogs").appendChild(div)}
+	,mobElem:document.querySelector(".DonateView")
+});
+</script>
+
 </body>
 </html>
